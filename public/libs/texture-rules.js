@@ -44,7 +44,7 @@ var MullionVertical = function({ color, width, start, end }) {
         if (!overide) context.strokeStyle = color;
         context.lineWidth = width;
 
-        for (var x = 0; x < canvas.width; x += stepX) {
+        for (var x = 0; x <= canvas.width; x += stepX) {
 
 
             let x2 = x + stepX
@@ -101,7 +101,7 @@ var MullionHorizontal = function({ color, width, start, end }) {
 
 
 
-var Replace = function(rules) {
+var Replace = function(rules, optional) {
 
     let { type, elements, component } = rules
 
@@ -151,7 +151,7 @@ var Replace = function(rules) {
             let index = elements[i]
             let row = cells[index]
 
-                        if (!overide) {
+            if (!overide) {
                 context.fillStyle = component
             }
 
@@ -159,9 +159,24 @@ var Replace = function(rules) {
 
                 let t = j % 2
 
-
                 if (t === 0) {
 
+                                    if (component === 'split'){
+
+                        let {left,right} = splitCell(row[j])
+
+                        if (!overide) context.fillStyle = optional[0]
+                        replaceCell(left, component, cells, context, canvas, overide)
+
+                        if (!overide) context.fillStyle = optional[1]
+                        replaceCell(right, component, cells, context, canvas, overide)
+
+
+                    continue;
+
+
+
+                    } 
 
                     replaceCell(row[j], component, cells, context, canvas, overide)
 
@@ -181,7 +196,7 @@ var Replace = function(rules) {
             let index = elements[i]
             let row = cells[index]
 
-                        if (!overide) {
+            if (!overide) {
                 context.fillStyle = component
             }
 
@@ -190,6 +205,25 @@ var Replace = function(rules) {
                 let t = j % 2
 
                 if (t !== 0) {
+
+
+                    if (component === 'split'){
+
+                        let {left,right} = splitCell(row[j])
+
+                        if (!overide) context.fillStyle = optional[0]
+                        replaceCell(left, component, cells, context, canvas, overide)
+
+                        if (!overide) context.fillStyle = optional[1]
+                        replaceCell(right, component, cells, context, canvas, overide)
+
+
+                    continue;
+
+
+
+                    } 
+
 
                     replaceCell(row[j], component, cells, context, canvas, overide)
 
@@ -206,15 +240,32 @@ var Replace = function(rules) {
 
 }
 
+
+function splitCell(cell){
+
+    let { xPos, yPos, stepX, stepY } = cell    
+
+    let halfStep = stepX/2
+    let x1 = xPos
+    let x2 = xPos +halfStep
+
+
+    let left = {xPos:x1, yPos, stepX:halfStep, stepY }
+    let right = {xPos:x2, yPos, stepX:halfStep, stepY }
+
+    return {left,right}
+
+
+}
+
 function replaceCell(cell, component, cells, context, canvas, overide) {
 
 
     let { xPos, yPos, stepX, stepY } = cell
-
-    // if (!overide) context.fillStyle = component
     drawBay({ context, xPos, yPos, stepX, stepY })
 
 }
+
 
 
 

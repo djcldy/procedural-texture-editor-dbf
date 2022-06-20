@@ -1,14 +1,14 @@
 import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
-import { 
-    CurtainWall, 
-    MullionVertical, 
-    MullionHorizontal, 
-    StripWindow, 
-    StripMullion, 
-    RandomHorizontal, 
+import {
+    CurtainWall,
+    MullionVertical,
+    MullionHorizontal,
+    StripWindow,
+    StripMullion,
+    RandomHorizontal,
     Replace,
-    Frame 
-    } from './texture-rules.js'; // maciej make sure ur loading threjs here
+    Frame
+} from './texture-rules.js'; // maciej make sure ur loading threjs here
 
 
 
@@ -139,26 +139,166 @@ export function Office90(buildingAttributes) {
 
 
 
+
+export function Office80(buildingAttributes) {
+
+    let settings = {
+
+        name: 'office-80%',
+        buildingAttributes,
+        cellWidth: 1.5,
+        moduleWidth: 6,
+        horizontalGrid: [0, 0.2, 1],
+        bumpMap: [0, 0, 50, 50],
+        alphaMap: [155, 255, 255, 255, 255],
+        rules: [
+            CurtainWall('#b8d7e1'),
+            Replace({ type: 'row', elements: [0], component: 'white' }),
+            drawVerticals,
+            drawHorizontals,
+
+        ]
+    }
+
+    return settings
+
+}
+
+
+export function Office60(buildingAttributes) {
+
+    let settings = {
+
+        name: 'office-80%',
+        buildingAttributes,
+        cellWidth: 3,
+        moduleWidth: 6,
+        horizontalGrid: [0, 0.2, 1],
+        bumpMap: [0, 0, 0, 50, 50],
+        alphaMap: [155, 255, 255, 255, 255],
+        rules: [
+            CurtainWall('#b8d7e1'),
+            Replace({ type: 'row', elements: [0], component: 'silver' }),
+            MullionVertical({ color: 'grey', width: 20, start: 0.2, end: 1 }),
+            drawVerticals,
+            drawHorizontals,
+
+        ]
+    }
+
+    return settings
+
+}
+
+
 export function Office50(buildingAttributes) {
 
     let settings = {
 
-        name: 'office-50%',
+        name: 'office-80%',
+        buildingAttributes,
+        cellWidth: 1.5,
+        moduleWidth: 6,
+        horizontalGrid: [0, 0.2, 1],
+        bumpMap: [0, 0, 0, 50, 50],
+        alphaMap: [155, 255, 255, 255, 255],
+        rules: [
+            CurtainWall('#b8d7e1'),
+            Replace({ type: 'row', elements: [0], component: 'silver' }),
+            MullionVertical({ color: 'grey', width: 20, start: 0.2, end: 1 }),
+            drawVerticals,
+            drawHorizontals,
+
+        ]
+    }
+
+    return settings
+
+}
+
+
+
+
+
+export function Office30(buildingAttributes) {
+
+    // this is institutional / public
+
+    let settings = {
+
+        name: 'office-20%',
         buildingAttributes,
         cellWidth: 1,
         moduleWidth: 8,
         horizontalGrid: [0, 0.25, 0.5, 0.75, 1],
-        bumpMap: [0, 100, 100, 100,100],
-        alphaMap: [155, 255,255,255],
+        bumpMap: [0, 0, 0, 100, 100],
+        alphaMap: [200, 255, 255, 255],
+        cellWidth: 1,
+        rules: [
+            CurtainWall('#b8d7e1'),
+            Replace({ type: 'checkers_a', elements: [0, 2], component: 'split' }, ['white', 'grey']),
+            Replace({ type: 'checkers_b', elements: [1, 3], component: 'split' }, ['#b8d7e1', 'grey']),
+            drawVerticals,
+            drawHorizontals,
+        ]
+    }
+
+    return settings
+
+}
+
+
+
+
+
+export function Office20(buildingAttributes) {
+
+    // this is institutional / public
+
+    let settings = {
+
+        name: 'office-20%',
+        buildingAttributes,
+        cellWidth: 1,
+        moduleWidth: 8,
+        horizontalGrid: [0, 1],
+        bumpMap: [0, 100, 100, 100, 100],
+        alphaMap: [200, 255, 255, 255],
+        cellWidth: 1,
+        rules: [
+            CurtainWall('grey'),
+            drawVerticals,
+            drawHorizontals,
+            // Replace({ type: 'checkers_a', elements: [0, 2], component: 'white' }),
+            // Replace({ type: 'checkers_b', elements: [1, 3], component: 'white' }),
+        ]
+    }
+
+    return settings
+
+}
+export function Institutional50(buildingAttributes) {
+
+    // this is institutional / public
+
+    let settings = {
+
+        name: 'institutional-50%',
+        buildingAttributes,
+        cellWidth: 1,
+        moduleWidth: 8,
+        horizontalGrid: [0, 0.25, 0.5, 0.75, 1],
+        bumpMap: [0, 100, 100, 100, 100],
+        alphaMap: [155, 255, 255, 255],
         cellWidth: 1,
         moduleWidth: 8,
         horizontalGrid: [0, 0.25, 0.5, 0.75, 1],
         rules: [
-        CurtainWall('#b8d7e1'),
-        drawVerticals,
-        drawHorizontals,
-        Replace({ type: 'checkers_a', elements: [0, 2], component: 'white' }),
-        Replace({ type: 'checkers_b', elements: [1, 3], component: 'white' }),
+            CurtainWall('#b8d7e1'),
+            drawVerticals,
+            drawHorizontals,
+            Replace({ type: 'checkers_a', elements: [0, 2], component: 'white' }),
+            Replace({ type: 'checkers_b', elements: [1, 3], component: 'white' }),
         ]
     }
 
@@ -207,12 +347,12 @@ export function Recreational90(buildingAttributes) {
         moduleWidth: 8,
         horizontalGrid: [0, 0.25, 0.5, 0.75, 1],
         bumpMap: [0, 50, 50, 255, 255],
-        alphaMap: [155, 255, 255, 255,255,255],
+        alphaMap: [155, 255, 255, 255, 255, 255],
         rules: [
             CurtainWall('#b8d7e1'),
             MullionVertical({ color: 'white', width: 1, start: 0, end: 1 }),
             MullionHorizontal({ color: 'white', width: 1, start: 0, end: 1 }),
-            RandomHorizontal({ color: 'black', width:2, probability: 0.1 }),
+            RandomHorizontal({ color: 'black', width: 2, probability: 0.1 }),
             RandomHorizontal({ color: 'black', width: 4, probability: 0.1 }),
         ]
     }
@@ -232,7 +372,7 @@ export function Institutional90(buildingAttributes) {
         moduleWidth: 8,
         horizontalGrid: [0, 0.25, 0.5, 0.75, 1],
         bumpMap: [0, 50, 50, 255, 255],
-        alphaMap: [155, 255, 255, 255,255,255],
+        alphaMap: [155, 255, 255, 255, 255, 255],
         rules: [
             CurtainWall('#b8d7e1'),
             MullionVertical({ color: 'white', width: 1, start: 0, end: 1 }),
@@ -426,8 +566,8 @@ function drawVerticals({ settings, canvas, context, stepX, stepY }, overide) {
     let y = 0
 
 
-    if (!overide)  context.strokeStyle = 'white';
-context.lineWidth = 3;
+    if (!overide) context.strokeStyle = 'white';
+    context.lineWidth = 3;
 
 
     for (var x = 0; x < canvas.width; x += stepX) {
@@ -442,11 +582,11 @@ context.lineWidth = 3;
 }
 
 
-function drawHorizontals({ settings, canvas, context },overide) {
+function drawHorizontals({ settings, canvas, context }, overide) {
 
     let { horizontalGrid } = settings
 
-    if (!overide)  context.strokeStyle = 'white';
+    if (!overide) context.strokeStyle = 'white';
     context.lineWidth = 3;
 
     let y = 0;
@@ -932,3 +1072,10 @@ function debugCells({ cells, context, canvas }) {
 
 
 }
+
+
+
+let Office = { Office90, Office80, Office60, Office50, Office30, Office20 }
+
+
+export { Office }

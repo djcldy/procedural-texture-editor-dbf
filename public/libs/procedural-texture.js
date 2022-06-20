@@ -6,19 +6,21 @@ import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading 
 import {
     Commercial90, 
     Residential90, 
-    Office90, 
-    Office50,
+
+    Office, 
     Industrial90, 
     Recreational90,
     Institutional90,
+    Institutional50,
     Custom
 } from './texture-presets.js'
 
 
+let {Office90,Office80,Office60,Office50,Office30,Office20} = Office 
 
 export function CreateTexture(buildingAttributes) {
 
-    return TextureFactory(Office50(buildingAttributes))
+    return TextureFactory(Office30(buildingAttributes))
 
 
 }
