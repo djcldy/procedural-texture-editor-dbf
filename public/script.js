@@ -123,6 +123,8 @@ function setMatrix(matrix, x, y, z) {
 
 
 function GetFacadeMaterial(settings) {
+
+    console.log('get facade material')
     let buildingColorHex = "#777777";
     let slabColorHex = "#000000";
 

@@ -1,8 +1,12 @@
 import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
 import {
+    Background, 
     CurtainWall,
     MullionVertical,
     MullionHorizontal,
+    PunchWindow, 
+    PunchMullion, 
+    Horizontal, 
     StripWindow,
     StripMullion,
     RandomHorizontal,
@@ -108,6 +112,25 @@ export function Residential90(buildingAttributes) {
     }
 
     return settings
+}
+
+export function Residential80(buildingAttributes) {
+
+    return {
+        name: 'residential-80%',
+        buildingAttributes,
+        cellWidth: 3,
+        moduleWidth: 6,
+        horizontalGrid: [0, 0.2, 0.8, 1],
+        bumpMap: [100, 0, 100, 150, 200],
+        alphaMap: [255, 155, 255, 255],
+        rules: [
+            Background('grey'),
+            PunchWindow({ color: '#5b5d58', top: 0.2, bottom: 0.2, left: 0.2, right: 0.2 }),
+            PunchMullion({ color: 'black', width: 2, subDiv: 4,  top: 0.2, bottom: 0.2, left: 0.2, right: 0.2 })
+
+        ],
+    }
 }
 
 
@@ -500,22 +523,6 @@ var Gradient = function(settings) {
 
 
 
-var Background = function(color) {
-
-    let obj = {}
-
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
-
-        if (!overide) context.fillStyle = color;
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-    }
-
-    return obj.draw
-
-}
-
-
 
 
 
@@ -647,238 +654,6 @@ var Stroke = function({ color, width }) {
 
 
 
-
-
-var Horizontal = function({ color, width, t }) {
-
-
-    let obj = {}
-
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
-
-
-        if (!overide) {
-
-            context.lineWidth = width;
-            context.strokeStyle = color;
-            context.stroke();
-
-
-        }
-
-
-        let y1 = canvas.height * t
-
-
-        for (var x = 0; x < canvas.width; x++) { // wierd bug here
-
-
-
-            drawMullion(context, 0, y1, canvas.width, y1)
-
-
-        }
-
-
-
-    }
-
-    return obj.draw
-
-
-}
-
-
-
-// var MullionHorizontal = function({ color, width, start, end }) {
-
-//     let obj = {}
-
-//     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
-
-//         let { horizontalGrid } = settings
-
-
-//         let y = 0
-
-//         if (!overide) context.strokeStyle = color;
-//         context.lineWidth = width;
-
-
-//         for (var i = 0; i < horizontalGrid.length; i++) {
-
-
-//             let y = horizontalGrid[i] * canvas.height
-//             let x1 = canvas.width * start
-//             let x2 = canvas.width * end
-//             drawMullion(context, x1, y, x2, y)
-//             // drawMullion(context, x2, y, x2, y)
-
-//         }
-
-
-
-//     }
-
-//     return obj.draw
-
-// }
-
-
-// var MullionVertical = function({ color, width, start, end }) {
-
-//     let obj = {}
-
-//     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
-
-//         let y = 0
-
-//         if (!overide) context.strokeStyle = color;
-//         context.lineWidth = width;
-
-//         for (var x = 0; x < canvas.width; x += stepX) {
-
-
-//             let x2 = x + stepX
-//             let y1 = canvas.height * start
-//             let y2 = canvas.height * end
-
-//             drawMullion(context, x, y1, x, y2)
-//             drawMullion(context, x2, y1, x2, y2)
-
-//         }
-
-
-
-//     }
-
-//     return obj.draw
-
-// }
-
-
-
-var WindowWall = function({ windowColor, frameColor, mullionColor, frameWidth, mullionWidth, x1, y1, x2, y2, subDiv }) {
-
-    let obj = {}
-
-    obj.draw = function({ settings, canvas, context, stepX, stepY }) {
-
-
-        context.strokeStyle = frameColor;
-        context.fillStyle = windowColor
-        context.stroke();
-
-
-        let xPos = x1 * canvas.width
-        let yPos = y1 * canvas.height
-
-        let c = x2 * canvas.width
-        let d = y2 * canvas.height
-
-        stepX = c - xPos
-        stepY = d - yPos
-
-        drawBay({ context, xPos, yPos, stepX, stepY })
-
-
-
-        let { color } = settings
-
-
-        context.lineWidth = mullionWidth;
-
-        let step = stepX / subDiv
-
-        for (var x = xPos; x < c; x += step) {
-
-            drawMullion(context, x, yPos, x, yPos + stepY)
-
-        }
-
-
-        for (var x = 0; x < canvas.width; x++) { // wierd bug here
-
-            context.lineWidth = frameWidth;
-
-            drawFrame(context, xPos, yPos, c, d)
-
-            context.lineWidth = frameWidth + 2
-            drawMullion(context, xPos, d, c, d) //
-
-
-        }
-
-
-
-    }
-
-    return obj.draw
-
-}
-
-
-
-var WindowWall = function({ windowColor, frameColor, mullionColor, frameWidth, mullionWidth, x1, y1, x2, y2, subDiv }) {
-
-    let obj = {}
-
-    obj.draw = function({ settings, canvas, context, stepX, stepY }) {
-
-
-        context.strokeStyle = frameColor;
-        context.fillStyle = windowColor
-        context.stroke();
-
-
-        let xPos = x1 * canvas.width
-        let yPos = y1 * canvas.height
-
-        let c = x2 * canvas.width
-        let d = y2 * canvas.height
-
-        stepX = c - xPos
-        stepY = d - yPos
-
-        drawBay({ context, xPos, yPos, stepX, stepY })
-
-
-
-        let { color } = settings
-
-
-        context.lineWidth = mullionWidth;
-
-        let step = stepX / subDiv
-
-        for (var x = xPos; x < c; x += step) {
-
-            drawMullion(context, x, yPos, x, yPos + stepY)
-
-        }
-
-
-        for (var x = 0; x < canvas.width; x++) { // wierd bug here
-
-            context.lineWidth = frameWidth;
-
-            drawFrame(context, xPos, yPos, c, d)
-
-            context.lineWidth = frameWidth + 2
-            drawMullion(context, xPos, d, c, d) //
-
-
-        }
-
-
-
-    }
-
-    return obj.draw
-
-}
-
-
 function setColor(context, channel, index, { bump, alpha }, diffuse) {
 
     switch (channel) {
@@ -892,151 +667,6 @@ function setColor(context, channel, index, { bump, alpha }, diffuse) {
             context.fillStyle = color
     }
 }
-
-
-
-// var CurtainWall = function(diffuse) {
-
-//     let obj = {}
-
-//     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
-
-
-//         if (!overide) context.fillStyle = diffuse
-
-//         // var value = Math.floor(Math.random() * 64);
-//         // context.fillStyle = 'rgb(' + [34, 155 + value, 215].join(',') + ')';
-
-//         // // context.fillStyle = color
-//         // setColor(context, channel, index, settings, diffuse)
-
-//         for (var x = 0; x < canvas.width; x += stepX) {
-
-
-
-//             drawBay({ context, xPos: x, yPos: 0, stepX, stepY })
-//         }
-
-
-
-//     }
-
-//     return obj.draw
-
-// }
-
-
-// var Replace = function(rules) {
-
-//     let { type, elements, component } = rules
-
-//     let obj = {}
-
-//     obj.rule = function(params, overide) {
-
-//         obj[type](params, overide)
-
-//     }
-
-//     obj.row = function({ cells, context, canvas, horizontalGrid }, overide) {
-
-
-//         // let {         horizontalGrid: [0, 0.2, 0.8, 1],}
-
-
-
-//         for (var i = 0; i < elements.length; i++) {
-
-//             let index = elements[i]
-
-
-//             let xPos = 0
-//             let yPos = horizontalGrid[index] * canvas.height
-//             let stepY = horizontalGrid[index + 1] * canvas.height - yPos
-
-
-
-
-//             // // let row = cells[index]
-
-
-
-//             if (!overide) {
-//                 context.fillStyle = component
-//             }
-
-
-//             drawBay({ context, xPos, yPos, stepX: canvas.width, stepY })
-
-//         }
-
-
-//     }
-
-
-//     obj.checkers_a = function({ cells, context, canvas }, overide) {
-
-
-//         for (var i = 0; i < elements.length; i++) {
-
-//             let index = elements[i]
-//             let row = cells[index]
-//             for (let j = 0; j < row.length; j++) {
-
-//                 let t = j % 2
-
-
-//                 if (t === 0) {
-
-
-//                     replaceCell(row[j], component, cells, context, canvas, overide)
-
-//                 }
-
-//             }
-//         }
-
-
-//     }
-
-
-//     obj.checkers_b = function({ cells, context, canvas }, overide) {
-
-//         for (var i = 0; i < elements.length; i++) {
-
-//             let index = elements[i]
-//             let row = cells[index]
-//             for (let j = 0; j < row.length; j++) {
-
-//                 let t = j % 2
-
-//                 if (t !== 0) {
-
-//                     replaceCell(row[j], component, cells, context, canvas, overide)
-
-//                 }
-
-
-//             }
-//         }
-
-
-//     }
-
-//     return obj.rule
-
-// }
-
-
-// function replaceCell(cell, component, cells, context, canvas, overide) {
-
-
-//     let { xPos, yPos, stepX, stepY } = cell
-
-//     // if (!overide) context.fillStyle = component
-//     drawBay({ context, xPos, yPos, stepX, stepY })
-
-// }
 
 
 
@@ -1076,6 +706,7 @@ function debugCells({ cells, context, canvas }) {
 
 
 let Office = { Office90, Office80, Office60, Office50, Office30, Office20 }
+let Residential = {Residential90, Residential80}
 
 
-export { Office }
+export { Office, Residential }

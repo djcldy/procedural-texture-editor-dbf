@@ -2,6 +2,23 @@ import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading 
 
 
 
+var Background = function(color) {
+
+    let obj = {}
+
+    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
+        if (!overide) context.fillStyle = color;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+    }
+
+    return obj.draw
+
+}
+
+
+
 
 var CurtainWall = function(diffuse) {
 
@@ -32,6 +49,52 @@ var CurtainWall = function(diffuse) {
     return obj.draw
 
 }
+
+
+
+
+
+
+var Horizontal = function({ color, width, t }) {
+
+
+    let obj = {}
+
+    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
+
+        if (!overide) {
+
+            context.lineWidth = width;
+            context.strokeStyle = color;
+            context.stroke();
+
+
+        }
+
+
+        let y1 = canvas.height * t
+
+
+        for (var x = 0; x < canvas.width; x++) { // wierd bug here
+
+
+
+            drawMullion(context, 0, y1, canvas.width, y1)
+
+
+        }
+
+
+
+    }
+
+    return obj.draw
+
+
+}
+
+
 
 var MullionVertical = function({ color, width, start, end }) {
 
@@ -161,9 +224,9 @@ var Replace = function(rules, optional) {
 
                 if (t === 0) {
 
-                                    if (component === 'split'){
+                    if (component === 'split') {
 
-                        let {left,right} = splitCell(row[j])
+                        let { left, right } = splitCell(row[j])
 
                         if (!overide) context.fillStyle = optional[0]
                         replaceCell(left, component, cells, context, canvas, overide)
@@ -172,11 +235,11 @@ var Replace = function(rules, optional) {
                         replaceCell(right, component, cells, context, canvas, overide)
 
 
-                    continue;
+                        continue;
 
 
 
-                    } 
+                    }
 
                     replaceCell(row[j], component, cells, context, canvas, overide)
 
@@ -207,9 +270,9 @@ var Replace = function(rules, optional) {
                 if (t !== 0) {
 
 
-                    if (component === 'split'){
+                    if (component === 'split') {
 
-                        let {left,right} = splitCell(row[j])
+                        let { left, right } = splitCell(row[j])
 
                         if (!overide) context.fillStyle = optional[0]
                         replaceCell(left, component, cells, context, canvas, overide)
@@ -218,11 +281,11 @@ var Replace = function(rules, optional) {
                         replaceCell(right, component, cells, context, canvas, overide)
 
 
-                    continue;
+                        continue;
 
 
 
-                    } 
+                    }
 
 
                     replaceCell(row[j], component, cells, context, canvas, overide)
@@ -241,19 +304,19 @@ var Replace = function(rules, optional) {
 }
 
 
-function splitCell(cell){
+function splitCell(cell) {
 
-    let { xPos, yPos, stepX, stepY } = cell    
+    let { xPos, yPos, stepX, stepY } = cell
 
-    let halfStep = stepX/2
+    let halfStep = stepX / 2
     let x1 = xPos
-    let x2 = xPos +halfStep
+    let x2 = xPos + halfStep
 
 
-    let left = {xPos:x1, yPos, stepX:halfStep, stepY }
-    let right = {xPos:x2, yPos, stepX:halfStep, stepY }
+    let left = { xPos: x1, yPos, stepX: halfStep, stepY }
+    let right = { xPos: x2, yPos, stepX: halfStep, stepY }
 
-    return {left,right}
+    return { left, right }
 
 
 }
@@ -340,6 +403,85 @@ var StripWindow = function({ color, x1, y1, x2, y2 }) {
     return obj.draw
 
 }
+
+
+
+
+var PunchMullion = function({ color, top, bottom, left, right, width, subDiv }) {
+
+    let obj = {}
+
+    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
+
+        if (!overide) {
+            context.strokeStyle = color
+            context.stroke();
+        }
+        context.lineWidth = width;
+
+
+        let w = stepX * (1 - left - right)
+        let h = stepY * (1 - top - bottom)
+        let step = w / subDiv
+
+        for (var x = 0; x <= canvas.width; x += stepX) {
+
+            let x1 = x + left * stepX
+            let y1 = top * stepY
+
+            for (var j = 0; j <= subDiv; j++) {
+                let x2 = x1 + j * step
+                drawMullion(context, x2, stepY * top, x2, stepY * (1 - bottom))
+            }
+
+             drawMullion(context, x1, stepY * top, x1+w, stepY * top)
+             drawMullion(context, x1, stepY * (1 - bottom), x1+w, stepY * (1 - bottom))
+
+        }
+
+               
+
+    }
+
+    return obj.draw
+
+}
+
+
+
+var PunchWindow = function({ color, top, bottom, left, right }) {
+
+    let obj = {}
+
+    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
+
+        if (!overide) {
+            context.strokeStyle = color
+            context.stroke();
+        }
+
+        let w = stepX * (1 - left - right)
+        let h = stepY * (1 - top - bottom)
+
+        for (var x = 0; x < canvas.width; x += stepX) {
+
+            let x1 = x + left * stepX
+            let y1 = top * stepY
+
+            drawBay({ context, xPos: x1, yPos: y1, stepX: w, stepY: h })
+
+        }
+
+
+
+    }
+
+    return obj.draw
+
+}
+
 
 
 
@@ -447,4 +589,19 @@ function drawMullion(context, x1, y1, x2, y2) {
 
 
 
-export { CurtainWall, Frame, MullionVertical, MullionHorizontal, StripWindow, StripMullion, RandomHorizontal, Replace }
+export {
+
+    Background,
+    CurtainWall,
+    Frame,
+    Horizontal,
+    MullionVertical,
+    MullionHorizontal,
+    PunchMullion,
+    PunchWindow,
+    StripWindow,
+    StripMullion,
+    RandomHorizontal,
+    Replace
+
+}

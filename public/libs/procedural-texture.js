@@ -4,11 +4,10 @@ import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading 
 
 
 import {
-    Commercial90, 
-    Residential90, 
-
-    Office, 
-    Industrial90, 
+    Commercial90,
+    Residential, 
+    Office,
+    Industrial90,
     Recreational90,
     Institutional90,
     Institutional50,
@@ -16,16 +15,25 @@ import {
 } from './texture-presets.js'
 
 
-let {Office90,Office80,Office60,Office50,Office30,Office20} = Office 
+let { Office90, Office80, Office60, Office50, Office30, Office20 } = Office
+
+let { Residential90, Residential80 } = Residential
 
 export function CreateTexture(buildingAttributes) {
 
 
-    let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
+    console.log('createTexture')
 
-const randomRule = rules[Math.floor(Math.random() * rules.length)];
-    // return TextureFactory(Office30(buildingAttributes))
-  return TextureFactory(randomRule(buildingAttributes))
+
+    // let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
+
+    // const randomRule = rules[Math.floor(Math.random() * rules.length)];
+    //     // return TextureFactory(Office30(buildingAttributes))
+    // return TextureFactory(randomRule(buildingAttributes))
+
+
+    return TextureFactory(Residential80(buildingAttributes))
+
 
 
 }
@@ -34,7 +42,7 @@ const randomRule = rules[Math.floor(Math.random() * rules.length)];
 
 
 
-function overideStyle(value,context){
+function overideStyle(value, context) {
 
     context.fillStyle = 'rgb(' + [value, value, value].join(',') + ')';
     context.strokeStyle = 'rgb(' + [value, value, value].join(',') + ')';
@@ -47,18 +55,18 @@ function TextureFactory(settings) {
 
     // let buildingAttri/butes = settings 
 
-    let {totalHeight, floorHeight,totalWidth} = settings.buildingAttributes 
-    let { moduleWidth} = settings 
+    let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes
+    let { moduleWidth } = settings
 
-    let numFloors = totalHeight/floorHeight
-    let numModules = totalWidth/moduleWidth 
+    let numFloors = totalHeight / floorHeight
+    let numModules = totalWidth / moduleWidth
 
-    let repeat = {x: numModules, y: numFloors}         
-    let {bumpMap, alphaMap, /*repeat*/} = settings
+    let repeat = { x: numModules, y: numFloors }
+    let { bumpMap, alphaMap, /*repeat*/ } = settings
 
-    let diffuse = Texture(Map(settings,false ), repeat)
-    let alpha = Texture(Map(settings,alphaMap), repeat)
-    let bump = Texture(Map(settings,bumpMap), repeat)
+    let diffuse = Texture(Map(settings, false), repeat)
+    let alpha = Texture(Map(settings, alphaMap), repeat)
+    let bump = Texture(Map(settings, bumpMap), repeat)
 
     return { diffuse, alpha, bump }
 
@@ -126,31 +134,31 @@ function Map(settings, overide) {
             // console.log('overide style', overide[i])
             overideStyle(overide[i], context)
         }
-        
+
         rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
-    
+
     }
 
     return canvas;
 
 }
 
-function checkOverideArray(overide,rules){
+function checkOverideArray(overide, rules) {
 
-    let defaultValue = 255 
-
-
-    if (overide.length >= rules.length) return 
+    let defaultValue = 255
 
 
-    let delta = rules.length - overide.length 
+    if (overide.length >= rules.length) return
 
-    for (var i = 0; i < delta.length; i++){
+
+    let delta = rules.length - overide.length
+
+    for (var i = 0; i < delta.length; i++) {
 
         overide.push(defaultValue)
     }
 
-    return 
+    return
 
 }
 
@@ -325,4 +333,3 @@ function mergeHorizontal(arr) {
     return canvas
 
 }
-
