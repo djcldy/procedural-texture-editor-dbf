@@ -38,28 +38,16 @@ export function defaultTexture(buildingAttributes) {
 
 
 
-export function Custom(buildingAttributes, repeat) {
+export function CustomRule(buildingAttributes, rule) {
+
+    console.log('custom rule!')
+
+    console.log(rule)
 
 
-    let settings = {
 
-        name: 'custom',
-        buildingAttributes,
-        cellWidth: 1.875,
-        moduleWidth: 7.5,
-        horizontalGrid: [0, 0.25, 0.5, 0.75, 1],
-        bumpMap: [0, 100, 100, 100],
-        alphaMap: [255, 100, 255, 255],
-        rules: [
-            Gradient(),
-            MullionVertical({ color: 'white', width: 2, start: 0, end: 1 }),
-            MullionHorizontal({ color: 'white', width: 2, start: 0, end: 1 }),
-            MullionHorizontal({ color: 'white', width: 4, start: 0.1, end: 0.9 }),
-        ],
-        repeat
-    }
+    return 
 
-    return settings
 }
 
 

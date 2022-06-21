@@ -11,7 +11,7 @@ import {
     Recreational90,
     Institutional90,
     Institutional50,
-    Custom
+    CustomRule
 } from './texture-presets.js'
 
 
@@ -19,10 +19,21 @@ let { Office90, Office80, Office60, Office50, Office30, Office20 } = Office
 
 let { Residential90, Residential80 } = Residential
 
-export function CreateTexture(buildingAttributes) {
+export function CreateTexture(buildingAttributes, rule) {
 
 
     console.log('createTexture')
+
+    if (rule){
+
+        console.log(rule)
+
+    // const customRule = JSON.parse(rule.value);
+    CustomRule(rule)
+    // console.log(rule)
+
+    }
+
 
 
     // let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
