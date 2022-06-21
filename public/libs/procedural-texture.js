@@ -20,7 +20,12 @@ let {Office90,Office80,Office60,Office50,Office30,Office20} = Office
 
 export function CreateTexture(buildingAttributes) {
 
-    return TextureFactory(Office30(buildingAttributes))
+
+    let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
+
+const randomRule = rules[Math.floor(Math.random() * rules.length)];
+    // return TextureFactory(Office30(buildingAttributes))
+  return TextureFactory(randomRule(buildingAttributes))
 
 
 }
@@ -118,7 +123,7 @@ function Map(settings, overide) {
 
         if (overide) {
 
-            console.log('overide style', overide[i])
+            // console.log('overide style', overide[i])
             overideStyle(overide[i], context)
         }
         
@@ -157,7 +162,7 @@ function initCanvas({ moduleWidth, floorHeight }) {
     canvas.width = moduleWidth * sf
     canvas.height = floorHeight * sf
 
-    console.log(canvas.width)
+    // console.log(canvas.width)
 
     let context = canvas.getContext('2d')
     context.fillStyle = '#ffffff';
