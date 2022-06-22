@@ -6,6 +6,8 @@ import sampleSolution from "./jsm/sampleSolution.js";
 import { extrudeBlock } from "./jsm/3d-tools.js";
 import { TextureBlock } from "./libs/block-elements.js";
 
+import { presets } from './libs/presets.js'
+
 let container;
 let camera, scene, raycaster;
 let renderer, control, orbit;
@@ -34,60 +36,147 @@ const ruleText = document.getElementById("ruleText");
 submitBtn.addEventListener("click", submitFacadeRule);
 
 
+
+// Execute a function when the user presses a key on the keyboard
+ruleText.addEventListener("keypress", function(event) {
+    // If the user presses the "Enter" key on the keyboard
+    if (event.key === "Enter") {
+        // Cancel the default action, if needed
+        event.preventDefault();
+        // Trigger the button element with a click
+        document.getElementById("submitFacade").click();
+    }
+});
+
+
+// <!DOCTYPE html>
+// <html>
+// <head>
+//     <title>Bind SELECT Element with JSON using JavaScript</title>
+//     <style>
+//         select, p, input {
+//             font: 1em Calibri;
+//         }
+//     </style>
+// </head>
+// <body>
+//     <p>
+//         <input type="button" 
+//             style="margin:10px 0;" 
+//                 onclick="populateSelect()" 
+//                     value="Click to Populate SELECT with JSON" />
+//     </p>
+
+//     <!--The SELECT element.-->
+//     <select id="sel" onchange="show(this)">
+//         <option value="">-- Select --</option>
+//     </select>
+
+//     <p id="msg"></p>
+
+//     <p style="padding:20px 0;">Also Read: <a href="https://www.encodedna.com/javascript/get-select-dropdown-list-selected-texts-using-javascript-and-jquery.htm" style="color:#00c;text-decoration:underlined;" target="_blank">How to get the selected text of a SELECT drop-down list using jQuery</a>.</p>
+// </body>
+
+// <script>
+
+
+        // <select id="sel" onchange="show(this)">
+
+var ele = document.getElementById('sel');
+
+for (let prop in presets) {
+
+    for (let step in presets[prop]) {
+        ele.innerHTML = ele.innerHTML + '<option value="' + prop + ',' + step + '">' + prop + '-' + step +'</option>';
+    }
+
+}
+
+sel.onchange = function (){
+
+    let ele = document.getElementById('sel');
+    let text = ele.value 
+    let id = text.split(",");
+    let settings = presets[id[0]][id[1]]
+    ruleText.value = JSON.stringify(settings, null, 4)
+    submitFacadeRule()
+
+
+}
+
 init();
 animate();
 
-
-
-
-
 function applyRule(rule) {
+
 
     let settings = ParseRequest(rule)
 
+    settings['buildingAttributes'] = {
+
+        totalHeight: 16,
+        floorHeight: 4,
+        totalWidth: 16,
+        slabThickness: 0.5,
+        buildingColorHex: "#777777",
+        slabColorHex: "#000000",
+
+    }
+
+    let mesh = materialSwatch(GenerateTexture(settings), settings.buildingAttributes)
+    scene.add(mesh)
 
 
 
-    Object.values(sampleSolution.blocks).map((block) => {
 
-        let meshes = TextureBlock(block);
-
-        // meshes.forEach((mesh) => {
-
-            let mesh = meshes[0]
-
-            let { width } = mesh;
-            let buildingAttributes = {
-                totalHeight: block.f2f * block.floors,
-                floorHeight: block.f2f,
-                totalWidth: width,
-                slabThickness: 0.5,
-                buildingColorHex: "#777777",
-                slabColorHex: "#000000",
-            };
-
-
-            settings['buildingAttributes'] = {
-
-                totalHeight: block.f2f * block.floors,
-                floorHeight: block.f2f,
-                totalWidth: mesh.width,
-                slabThickness: 0.5,
-                buildingColorHex: "#777777",
-                slabColorHex: "#000000",
-
-            };
-
-
-          /*  mesh.material =*/ RequestMaterial(settings,buildingAttributes);
-
-            // scene.add(mesh);
-        // });/**/
-    });
 
 
     // AddSlabs()
 
+}
+
+
+function materialSwatch({ diffuse, alpha, bump }, { totalHeight, totalWidth }) {
+
+    let material = new THREE.MeshPhongMaterial({
+        map: diffuse,
+        bumpMap: bump,
+        bumpScale: 1,
+        alphaMap: alpha,
+        envMap: cubeMap,
+        reflectivity: 0.3,
+        transparent: true,
+    });
+
+    let bumpMaterial = new THREE.MeshPhongMaterial({
+        map: bump,
+    });
+
+    let alphaMaterial = new THREE.MeshPhongMaterial({
+        map: alpha,
+    });
+
+    let diffuseMaterial = new THREE.MeshPhongMaterial({
+        map: diffuse,
+    });
+
+    const geometry = new THREE.BoxBufferGeometry(totalWidth, totalHeight, 0.1);
+
+    let object = new THREE.Mesh();
+
+    const mesh = new THREE.Mesh(geometry, material);
+    const meshDiffuse = new THREE.Mesh(geometry, diffuseMaterial);
+
+    const meshAlpha = new THREE.Mesh(geometry, alphaMaterial);
+    const meshBump = new THREE.Mesh(geometry, bumpMaterial);
+
+    meshDiffuse.position.set(-32, 32, 0);
+    meshAlpha.position.set(0, 32, 0);
+    meshBump.position.set(32, 32, 0);
+
+    object.add(mesh, meshBump, meshDiffuse, meshAlpha);
+
+    return object;
 }
 
 
@@ -120,7 +209,8 @@ function MergeObjects(obj1, obj2) {
 function RequestMaterial(settings) {
 
 
-    /*let { diffuse, alpha, bump } =*/ GenerateTexture(settings);
+    /*let { diffuse, alpha, bump } =*/
+
 
     // let material = new THREE.MeshPhongMaterial({
     //     map: diffuse,
@@ -350,8 +440,9 @@ function init() {
     container = document.createElement("div");
     document.body.appendChild(container);
     const aspect = window.innerWidth / window.innerHeight;
+
     camera = new THREE.PerspectiveCamera(50, aspect, 0.01, 30000);
-    camera.position.set(500, 250, 500);
+    camera.position.set(0, 0, 25);
     camera.lookAt(0, 0, 0);
 
     scene = new THREE.Scene();
@@ -367,7 +458,6 @@ function init() {
     });
 
     scene.background = cubeMap;
-    // scene.background = new THREE.Color(0xf0f0f0);
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(1, 1, 1).normalize();
@@ -375,15 +465,6 @@ function init() {
 
     const ambient = new THREE.AmbientLight(0x404040, 2); // soft white light
     scene.add(ambient);
-
-    // let object1 = createMesh();
-    // blocks = createBlocks();
-    // AddSlabs();
-    // initPlane();
-
-    // console.log(blocks)
-    // scene.add(blocks);
-    // scene.add(object1);
 
     raycaster = new THREE.Raycaster();
     renderer = new THREE.WebGLRenderer();
@@ -407,30 +488,7 @@ function init() {
 
 function initRequest() {
 
-    let data = {
-        "name": 'unitled',
-        "cellWidth": 6,
-        "moduleWidth": 1.5,
-        "horizontalGrid": [],
-        "bumpMap": [],
-        "alphaMap": [],
-        "rules": [],
-    }
-
-
-    let settings = {
-
-        name: 'commercial-90%',
-        cellWidth: 1.5,
-        moduleWidth: 6,
-        horizontalGrid: "[0, 1]",
-        bumpMap: "[0, 100, 100]",
-        alphaMap: "[225, 255, 255]",
-        rules: [
-            "CurtainWall('#ffefc6')",
-        ],
-    }
-
+    let settings = presets['industrial']['80']
     ruleText.value = JSON.stringify(settings, null, 4)
     submitFacadeRule()
 
@@ -443,7 +501,10 @@ function submitFacadeRule() {
 
     console.log('rule submitted')
 
+    ruleText.value = ruleText.value.replace(/\s+/g, '');
+    clearScene()
     applyRule(ruleText.value)
+    ruleText.value = JSON.stringify(JSON.parse(ruleText.value), null, 4)
 
 }
 
@@ -468,25 +529,6 @@ function setCubeMap() {
 }
 
 
-// function initTransformControl(scene) {
-//     let newControl = new TransformControls(camera, renderer.domElement);
-//     newControl.addEventListener("change", render);
-
-//     newControl.addEventListener("dragging-changed", function(event) {
-//         orbit.enabled = !event.value;
-//     });
-
-//     scene.add(newControl);
-
-//     return newControl;
-// }
-
-// function updateTransformControl(mesh) {
-//     console.log();
-
-//     control.attach(mesh);
-//     // control.detach(mesh)
-// }
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;

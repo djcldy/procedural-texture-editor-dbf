@@ -2,6 +2,24 @@ import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading 
 
 
 
+
+var Debug = function(msg) {
+
+    let obj = {}
+
+    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
+        console.log('hi')
+
+    }
+
+    return obj.draw
+
+}
+
+
+
+
 var Background = function(color) {
 
     let obj = {}
@@ -52,6 +70,44 @@ var CurtainWall = function(diffuse) {
 
 
 
+
+function drawVerticals({ settings, canvas, context, stepX, stepY }, overide) {
+
+
+    let y = 0
+
+
+    if (!overide) context.strokeStyle = 'white';
+    context.lineWidth = 3;
+
+
+    for (var x = 0; x < canvas.width; x += stepX) {
+        let xPos = x
+        let yPos = y
+        let width = stepX
+        let height = stepY
+        drawMullion(context, xPos, yPos, xPos, yPos + stepY)
+        drawMullion(context, xPos + stepX, yPos, xPos + stepX, yPos + stepY)
+    }
+
+}
+
+
+function drawHorizontals({ settings, canvas, context }, overide) {
+
+    let { horizontalGrid } = settings
+
+    if (!overide) context.strokeStyle = 'white';
+    context.lineWidth = 3;
+
+    let y = 0;
+
+    for (var i = 0; i < horizontalGrid.length; i++) {
+        let step = canvas.height * horizontalGrid[i]
+        drawMullion(context, 0, step, canvas.width, step)
+    }
+
+}
 
 
 
@@ -407,7 +463,7 @@ var StripWindow = function({ color, x1, y1, x2, y2 }) {
 
 
 
-var PunchMullion = function({ color, top, bottom, left, right, width, subDiv }) {
+var PunchMullion = function({ color, top, bottom, left, right, width, subDiv, repeat }) {
 
     let obj = {}
 
@@ -420,27 +476,50 @@ var PunchMullion = function({ color, top, bottom, left, right, width, subDiv }) 
         }
         context.lineWidth = width;
 
+        if (repeat) {
+            let w = stepX * (1 - left - right)
+            let h = stepY * (1 - top - bottom)
+            let step = w / subDiv
 
-        let w = stepX * (1 - left - right)
-        let h = stepY * (1 - top - bottom)
-        let step = w / subDiv
+            for (var x = 0; x <= canvas.width; x += stepX) {
 
-        for (var x = 0; x <= canvas.width; x += stepX) {
+                let x1 = x + left * stepX
+                let y1 = top * stepY
 
-            let x1 = x + left * stepX
-            let y1 = top * stepY
+                for (var j = 0; j <= subDiv; j++) {
+                    let x2 = x1 + j * step
+                    drawMullion(context, x2, stepY * top, x2, stepY * (1 - bottom))
+                }
 
-            for (var j = 0; j <= subDiv; j++) {
-                let x2 = x1 + j * step
-                drawMullion(context, x2, stepY * top, x2, stepY * (1 - bottom))
+                drawMullion(context, x1, stepY * top, x1 + w, stepY * top)
+                drawMullion(context, x1, stepY * (1 - bottom), x1 + w, stepY * (1 - bottom))
+
             }
-
-             drawMullion(context, x1, stepY * top, x1+w, stepY * top)
-             drawMullion(context, x1, stepY * (1 - bottom), x1+w, stepY * (1 - bottom))
-
+            return
         }
 
-               
+
+
+
+
+
+        let w = canvas.width * (1 - left - right)
+        let h = canvas.height * (1 - top - bottom)
+         let step = w / subDiv
+        let x1 = left * canvas.width
+        let y1 = top * canvas.height
+
+
+               for (var j = 0; j <= subDiv; j++) {
+                    let x2 = x1 + j * step
+                    drawMullion(context, x2, stepY * top, x2, stepY * (1 - bottom))
+                }
+
+
+        // drawMullion(context, x1, stepY * top, x1 + w, stepY * top)
+        // drawMullion(context, x1, stepY * (1 - bottom), x1 + w, stepY * (1 - bottom))
+
+
 
     }
 
@@ -450,11 +529,12 @@ var PunchMullion = function({ color, top, bottom, left, right, width, subDiv }) 
 
 
 
-var PunchWindow = function({ color, top, bottom, left, right }) {
+var PunchWindow = function({ color, top, bottom, left, right, repeat }) {
 
     let obj = {}
 
     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
 
 
         if (!overide) {
@@ -462,19 +542,32 @@ var PunchWindow = function({ color, top, bottom, left, right }) {
             context.stroke();
         }
 
-        let w = stepX * (1 - left - right)
-        let h = stepY * (1 - top - bottom)
+        if (repeat) {
 
-        for (var x = 0; x < canvas.width; x += stepX) {
 
-            let x1 = x + left * stepX
-            let y1 = top * stepY
+            let w = stepX * (1 - left - right)
+            let h = stepY * (1 - top - bottom)
 
-            drawBay({ context, xPos: x1, yPos: y1, stepX: w, stepY: h })
+            for (var x = 0; x < canvas.width; x += stepX) {
+
+                let x1 = x + left * stepX
+                let y1 = top * stepY
+
+                drawBay({ context, xPos: x1, yPos: y1, stepX: w, stepY: h })
+
+            }
+
+            return
 
         }
 
 
+        let w = canvas.width * (1 - left - right)
+        let h = canvas.height * (1 - top - bottom)
+        let x1 = left * canvas.width
+        let y1 = top * canvas.height
+
+        drawBay({ context, xPos: x1, yPos: y1, stepX: w, stepY: h })
 
     }
 
@@ -593,6 +686,9 @@ export {
 
     Background,
     CurtainWall,
+    drawVerticals,
+    drawHorizontals,
+    Debug,
     Frame,
     Horizontal,
     MullionVertical,

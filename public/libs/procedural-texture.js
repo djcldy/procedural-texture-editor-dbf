@@ -1,38 +1,56 @@
 console.log('procedural-texture.js')
 
 import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
-
+// import {
+//     Commercial90,
+//     Residential, 
+//     Office,
+//     Industrial90,
+//     Recreational90,
+//     Institutional90,
+//     Institutional50,
+//     CustomRule
+// } from './texture-presets.js'
 
 import {
-    Commercial90,
-    Residential, 
-    Office,
-    Industrial90,
-    Recreational90,
-    Institutional90,
-    Institutional50,
-    CustomRule
-} from './texture-presets.js'
-
-
-let { Office90, Office80, Office60, Office50, Office30, Office20 } = Office
-
-let { Residential90, Residential80 } = Residential
-
-
-
-
-
+    Background,
+    CurtainWall,
+    Debug,
+    drawVerticals,
+    drawHorizontals,
+    MullionVertical,
+    MullionHorizontal,
+    PunchWindow,
+    PunchMullion,
+    Horizontal,
+    StripWindow,
+    StripMullion,
+    RandomHorizontal,
+    Replace,
+    Frame
+} from './texture-rules.js'; // maciej make sure ur loading threjs here
 
 
 
 export function GenerateTexture(settings) {
 
-    let params = CustomRule(settings)
-
-    // return TextureFactory(params)
+    return TextureFactory(ParseRule(settings))
 
 }
+
+
+
+export function ParseRule(settings) {
+    let params = {settings: null, canvas:null, context:null, stepX: null, stepY:null}
+    let arr = []
+    settings['rules'].forEach(f => {
+        let meth = eval("(" + f + ")")
+        arr.push(meth)
+    })
+    settings['rules'] = arr 
+    return settings
+}
+
 
 export function CreateTexture(buildingAttributes, rule) {
 
@@ -44,7 +62,7 @@ export function CreateTexture(buildingAttributes, rule) {
     // return TextureFactory(randomRule(buildingAttributes))
 
 
-    return TextureFactory(Residential80(buildingAttributes))
+    // return TextureFactory(Residential80(buildingAttributes))
 
 
 
@@ -76,13 +94,11 @@ function TextureFactory(settings) {
     let repeat = { x: numModules, y: numFloors }
     let { bumpMap, alphaMap, /*repeat*/ } = settings
 
-    Texture(Map(settings, false), repeat)
-    
-    // let diffuse = Texture(Map(settings, false), repeat)
-    // let alpha = Texture(Map(settings, alphaMap), repeat)
-    // let bump = Texture(Map(settings, bumpMap), repeat)
+    let diffuse = Texture(Map(settings, false), repeat)
+    let alpha = Texture(Map(settings, alphaMap), repeat)
+    let bump = Texture(Map(settings, bumpMap), repeat)
 
-    // return { diffuse, alpha, bump }
+    return { diffuse, alpha, bump }
 
 }
 
@@ -126,6 +142,8 @@ function Texture(map, repeat) {
 
 function Map(settings, overide) {
 
+    console.log('map!')
+
     let { cellWidth, moduleWidth, buildingAttributes, rules, horizontalGrid } = settings
     let { floorHeight } = buildingAttributes
     let windowRatio = 0.1
@@ -143,11 +161,8 @@ function Map(settings, overide) {
 
     for (var i = 0; i < rules.length; i++) {
 
-        console.log(i)
-
         if (overide) overideStyle(overide[i], context)
-        console.log(rules[i]({ settings, canvas, context/*, stepX, stepY, cells, horizontalGrid */}))
-        // rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
+        rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
 
     }
 
