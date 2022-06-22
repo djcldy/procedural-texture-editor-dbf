@@ -1,7 +1,7 @@
 import * as THREE from "./jsm/three.module.js";
 import { OrbitControls } from "./jsm/OrbitControls.js";
 import { TransformControls } from "./jsm/TransformControls.js";
-import { CreateTexture } from "./libs/procedural-texture.js";
+import { CreateTexture, GenerateTexture } from "./libs/procedural-texture.js";
 import sampleSolution from "./jsm/sampleSolution.js";
 import { extrudeBlock } from "./jsm/3d-tools.js";
 import { TextureBlock } from "./libs/block-elements.js";
@@ -24,6 +24,16 @@ let floorHeight = 4;
 
 let blocks;
 
+
+let defaultMaterial
+
+
+
+const submitBtn = document.getElementById("submitFacade");
+const ruleText = document.getElementById("ruleText");
+submitBtn.addEventListener("click", submitFacadeRule);
+
+
 init();
 animate();
 
@@ -31,34 +41,170 @@ animate();
 
 
 
-function applyRule(rule){
+function applyRule(rule) {
 
-        let buildingColorHex = "#777777";
-    let slabColorHex = "#000000";
+    let settings = ParseRequest(rule)
+
+
+
 
     Object.values(sampleSolution.blocks).map((block) => {
+
         let meshes = TextureBlock(block);
 
-        meshes.forEach((mesh) => {
+        // meshes.forEach((mesh) => {
+
+            let mesh = meshes[0]
+
             let { width } = mesh;
-            let settings = {
+            let buildingAttributes = {
                 totalHeight: block.f2f * block.floors,
                 floorHeight: block.f2f,
                 totalWidth: width,
                 slabThickness: 0.5,
-                buildingColorHex,
-                slabColorHex,
+                buildingColorHex: "#777777",
+                slabColorHex: "#000000",
             };
 
-            mesh.material = GetFacadeMaterial(settings, rule);
 
-            scene.add(mesh);
-        });
+            settings['buildingAttributes'] = {
+
+                totalHeight: block.f2f * block.floors,
+                floorHeight: block.f2f,
+                totalWidth: mesh.width,
+                slabThickness: 0.5,
+                buildingColorHex: "#777777",
+                slabColorHex: "#000000",
+
+            };
+
+
+          /*  mesh.material =*/ RequestMaterial(settings,buildingAttributes);
+
+            // scene.add(mesh);
+        // });/**/
     });
 
 
-    AddSlabs()
+    // AddSlabs()
 
+}
+
+
+function MergeObjects(obj1, obj2) {
+
+
+    let obj = {}
+
+    for (let prop in obj1) {
+
+        obj[prop] = obj1[prop]
+
+    }
+
+
+    for (let prop in obj2) {
+
+        obj[prop] = obj2[prop]
+    }
+
+    return obj
+
+
+}
+
+
+
+
+
+function RequestMaterial(settings) {
+
+
+    /*let { diffuse, alpha, bump } =*/ GenerateTexture(settings);
+
+    // let material = new THREE.MeshPhongMaterial({
+    //     map: diffuse,
+    //     bumpMap: bump,
+    //     bumpScale: 1,
+    //     alphaMap: alpha,
+    //     envMap: cubeMap,
+    //     reflectivity: 0.3,
+    //     transparent: true,
+    // });
+
+
+
+    // let bumpMaterial = new THREE.MeshPhongMaterial({
+    //     map: bump,
+    // });
+
+    // let alphaMaterial = new THREE.MeshPhongMaterial({
+    //     map: alpha,
+    // });
+
+    // let diffuseMaterial = new THREE.MeshPhongMaterial({
+    //     map: diffuse,
+    // });
+
+
+
+    // return { material };
+}
+
+
+
+function GetFacadeMaterial(settings, rule) {
+
+    let buildingColorHex = "#777777";
+    let slabColorHex = "#000000";
+    let { diffuse, alpha, bump } = CreateTexture(settings, rule);
+
+    let material = new THREE.MeshPhongMaterial({
+        map: diffuse,
+        bumpMap: bump,
+        bumpScale: 1,
+        alphaMap: alpha,
+        envMap: cubeMap,
+        reflectivity: 0.3,
+        transparent: true,
+    });
+
+    let bumpMaterial = new THREE.MeshPhongMaterial({
+        map: bump,
+    });
+
+    let alphaMaterial = new THREE.MeshPhongMaterial({
+        map: alpha,
+    });
+
+    let diffuseMaterial = new THREE.MeshPhongMaterial({
+        map: diffuse,
+    });
+
+    return material;
+}
+
+
+function ParseRequest(str) {
+
+    let object = JSON.parse(str)
+
+    for (let prop in object) {
+
+        let x = object[prop]
+
+        if (isString(x) && prop !== 'name') {
+            console.log('is string!', x)
+            object[prop] = JSON.parse(x)
+        }
+    }
+
+    return object
+
+}
+
+function isString(x) {
+    return Object.prototype.toString.call(x) === "[object String]"
 }
 
 
@@ -140,36 +286,6 @@ function setMatrix(matrix, x, y, z) {
     return matrix;
 }
 
-function GetFacadeMaterial(settings, rule) {
-    
-    let buildingColorHex = "#777777";
-    let slabColorHex = "#000000";
-    let { diffuse, alpha, bump } = CreateTexture(settings, rule);
-
-    let material = new THREE.MeshPhongMaterial({
-        map: diffuse,
-        bumpMap: bump,
-        bumpScale: 1,
-        alphaMap: alpha,
-        envMap: cubeMap,
-        reflectivity: 0.3,
-        transparent: true,
-    });
-
-    let bumpMaterial = new THREE.MeshPhongMaterial({
-        map: bump,
-    });
-
-    let alphaMaterial = new THREE.MeshPhongMaterial({
-        map: alpha,
-    });
-
-    let diffuseMaterial = new THREE.MeshPhongMaterial({
-        map: diffuse,
-    });
-
-    return material;
-}
 
 function createMesh() {
     let buildingColorHex = "#777777";
@@ -242,8 +358,15 @@ function init() {
 
     cubeMap = setCubeMap();
 
-    scene.background = cubeMap;
+    defaultMaterial = new THREE.MeshPhongMaterial({
 
+        envMap: cubeMap,
+        reflectivity: 0.3,
+        transparent: true,
+
+    });
+
+    scene.background = cubeMap;
     // scene.background = new THREE.Color(0xf0f0f0);
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -254,19 +377,15 @@ function init() {
     scene.add(ambient);
 
     // let object1 = createMesh();
-
-    blocks = createBlocks();
-    AddSlabs();
-    initPlane();
+    // blocks = createBlocks();
+    // AddSlabs();
+    // initPlane();
 
     // console.log(blocks)
-
     // scene.add(blocks);
-
     // scene.add(object1);
 
     raycaster = new THREE.Raycaster();
-
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -276,13 +395,59 @@ function init() {
     orbit.update();
     orbit.addEventListener("change", render);
 
-    control = initTransformControl(scene);
-
     document.addEventListener("mousemove", onDocumentMouseMove, false);
-    // window.addEventListener('mouseup', selectionClick);
     window.addEventListener("resize", onWindowResize, false);
-    setEvents();
+
+    initRequest()
+
+
 }
+
+
+
+function initRequest() {
+
+    let data = {
+        "name": 'unitled',
+        "cellWidth": 6,
+        "moduleWidth": 1.5,
+        "horizontalGrid": [],
+        "bumpMap": [],
+        "alphaMap": [],
+        "rules": [],
+    }
+
+
+    let settings = {
+
+        name: 'commercial-90%',
+        cellWidth: 1.5,
+        moduleWidth: 6,
+        horizontalGrid: "[0, 1]",
+        bumpMap: "[0, 100, 100]",
+        alphaMap: "[225, 255, 255]",
+        rules: [
+            "CurtainWall('#ffefc6')",
+        ],
+    }
+
+    ruleText.value = JSON.stringify(settings, null, 4)
+    submitFacadeRule()
+
+}
+
+
+
+
+function submitFacadeRule() {
+
+    console.log('rule submitted')
+
+    applyRule(ruleText.value)
+
+}
+
+
 
 function setCubeMap() {
     console.log("setCubeMap");
@@ -302,154 +467,26 @@ function setCubeMap() {
     return new THREE.CubeTextureLoader().load(urls);
 }
 
-function setEvents() {
-    window.addEventListener("resize", onWindowResize, false);
-    window.addEventListener("keydown", function(event) {
-        switch (event.keyCode) {
-            case 81: // Q
-                control.setSpace(control.space === "local" ? "world" : "local");
-                break;
 
-            case 16: // Shift
-                control.setTranslationSnap(100);
-                control.setRotationSnap(THREE.MathUtils.degToRad(15));
-                control.setScaleSnap(0.25);
-                break;
+// function initTransformControl(scene) {
+//     let newControl = new TransformControls(camera, renderer.domElement);
+//     newControl.addEventListener("change", render);
 
-            case 87: // W
-                control.setMode("translate");
-                break;
+//     newControl.addEventListener("dragging-changed", function(event) {
+//         orbit.enabled = !event.value;
+//     });
 
-            case 69: // E
-                control.setMode("rotate");
-                break;
+//     scene.add(newControl);
 
-            case 82: // R
-                control.setMode("scale");
-                break;
+//     return newControl;
+// }
 
-            case 67: // C
-                const position = currentCamera.position.clone();
+// function updateTransformControl(mesh) {
+//     console.log();
 
-                currentCamera = currentCamera.isPerspectiveCamera ?
-                    cameraOrtho :
-                    cameraPersp;
-                currentCamera.position.copy(position);
-
-                orbit.object = currentCamera;
-                control.camera = currentCamera;
-
-                currentCamera.lookAt(orbit.target.x, orbit.target.y, orbit.target.z);
-                onWindowResize();
-                break;
-
-            case 86: // V
-                const randomFoV = Math.random() + 0.1;
-                const randomZoom = Math.random() + 0.1;
-
-                cameraPersp.fov = randomFoV * 160;
-                cameraOrtho.bottom = -randomFoV * 500;
-                cameraOrtho.top = randomFoV * 500;
-
-                cameraPersp.zoom = randomZoom * 5;
-                cameraOrtho.zoom = randomZoom * 5;
-                onWindowResize();
-                break;
-
-            case 187:
-            case 107: // +, =, num+
-                control.setSize(control.size + 0.1);
-                break;
-
-            case 189:
-            case 109: // -, _, num-
-                control.setSize(Math.max(control.size - 0.1, 0.1));
-                break;
-
-            case 88: // X
-                control.showX = !control.showX;
-                break;
-
-            case 89: // Y
-                control.showY = !control.showY;
-                break;
-
-            case 90: // Z
-                control.showZ = !control.showZ;
-                break;
-
-            case 32: // Spacebar
-                control.enabled = !control.enabled;
-                break;
-        }
-    });
-
-    window.addEventListener("keyup", function(event) {
-        switch (event.keyCode) {
-            case 16: // Shift
-                control.setTranslationSnap(null);
-                control.setRotationSnap(null);
-                control.setScaleSnap(null);
-                break;
-        }
-    });
-}
-
-function selectionHover() {
-    raycaster.setFromCamera(mouse, camera);
-
-    // const intersects = raycaster.intersectObjects(scene.children);
-
-    const intersects = raycaster.intersectObjects(objects);
-
-    //
-
-    if (intersects.length > 0) {
-        // if new object hovered
-
-        if (INTERSECTED != intersects[0].object) {
-            if (INTERSECTED) {
-                // old mesh
-
-                INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-                control.detach(INTERSECTED);
-            }
-
-            // new mesh
-
-            INTERSECTED = intersects[0].object;
-            INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-            INTERSECTED.material.emissive.setHex(0xff0000);
-
-            control.attach(INTERSECTED);
-        }
-    } else {
-        if (INTERSECTED)
-            INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-
-        INTERSECTED = null;
-    }
-}
-
-function initTransformControl(scene) {
-    let newControl = new TransformControls(camera, renderer.domElement);
-    newControl.addEventListener("change", render);
-
-    newControl.addEventListener("dragging-changed", function(event) {
-        orbit.enabled = !event.value;
-    });
-
-    scene.add(newControl);
-
-    return newControl;
-}
-
-function updateTransformControl(mesh) {
-    console.log();
-
-    control.attach(mesh);
-    // control.detach(mesh)
-}
+//     control.attach(mesh);
+//     // control.detach(mesh)
+// }
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -501,24 +538,10 @@ function initPlane() {
     scene.add(plane);
 }
 
-const submitBtn = document.getElementById("submitFacade");
-const ruleText = document.getElementById("ruleText");
-
-submitBtn.addEventListener("click", submitFacadeRule);
 
 
 
 
-
-function submitFacadeRule() {
-
-
-
-    clearScene()
-    applyRule(ruleText)
-
-
-}
 
 
 
@@ -527,7 +550,7 @@ function clearScene() {
 
     for (let i = scene.children.length - 1; i >= 0; i--) {
         if (scene.children[i].type === "Mesh")
-        scene.remove(scene.children[i]);
+            scene.remove(scene.children[i]);
     }
 
 

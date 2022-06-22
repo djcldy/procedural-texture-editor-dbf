@@ -19,21 +19,22 @@ let { Office90, Office80, Office60, Office50, Office30, Office20 } = Office
 
 let { Residential90, Residential80 } = Residential
 
+
+
+
+
+
+
+
+export function GenerateTexture(settings) {
+
+    let params = CustomRule(settings)
+
+    // return TextureFactory(params)
+
+}
+
 export function CreateTexture(buildingAttributes, rule) {
-
-
-    console.log('createTexture')
-
-    if (rule){
-
-        console.log(rule)
-
-    // const customRule = JSON.parse(rule.value);
-    CustomRule(rule)
-    // console.log(rule)
-
-    }
-
 
 
     // let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
@@ -75,11 +76,13 @@ function TextureFactory(settings) {
     let repeat = { x: numModules, y: numFloors }
     let { bumpMap, alphaMap, /*repeat*/ } = settings
 
-    let diffuse = Texture(Map(settings, false), repeat)
-    let alpha = Texture(Map(settings, alphaMap), repeat)
-    let bump = Texture(Map(settings, bumpMap), repeat)
+    Texture(Map(settings, false), repeat)
+    
+    // let diffuse = Texture(Map(settings, false), repeat)
+    // let alpha = Texture(Map(settings, alphaMap), repeat)
+    // let bump = Texture(Map(settings, bumpMap), repeat)
 
-    return { diffuse, alpha, bump }
+    // return { diffuse, alpha, bump }
 
 }
 
@@ -140,13 +143,11 @@ function Map(settings, overide) {
 
     for (var i = 0; i < rules.length; i++) {
 
-        if (overide) {
+        console.log(i)
 
-            // console.log('overide style', overide[i])
-            overideStyle(overide[i], context)
-        }
-
-        rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
+        if (overide) overideStyle(overide[i], context)
+        console.log(rules[i]({ settings, canvas, context/*, stepX, stepY, cells, horizontalGrid */}))
+        // rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
 
     }
 

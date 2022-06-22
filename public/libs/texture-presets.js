@@ -1,12 +1,12 @@
 import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
 import {
-    Background, 
+    Background,
     CurtainWall,
     MullionVertical,
     MullionHorizontal,
-    PunchWindow, 
-    PunchMullion, 
-    Horizontal, 
+    PunchWindow,
+    PunchMullion,
+    Horizontal,
     StripWindow,
     StripMullion,
     RandomHorizontal,
@@ -38,17 +38,30 @@ export function defaultTexture(buildingAttributes) {
 
 
 
-export function CustomRule(buildingAttributes, rule) {
+export function CustomRule(settings) {
 
-    console.log('custom rule!')
+    let arr = []
+    settings['rules'].forEach(f => {
 
-    console.log(rule)
+        let meth = eval("(" + f + ")")
 
+        // meth()
 
+        arr.push(meth)
 
-    return 
+    })
+
+    settings['rules'] = arr 
+
+    return settings
 
 }
+
+function debug(){
+
+    
+}
+
 
 
 
@@ -115,7 +128,7 @@ export function Residential80(buildingAttributes) {
         rules: [
             Background('grey'),
             PunchWindow({ color: '#5b5d58', top: 0.2, bottom: 0.2, left: 0.2, right: 0.2 }),
-            PunchMullion({ color: 'black', width: 2, subDiv: 4,  top: 0.2, bottom: 0.2, left: 0.2, right: 0.2 })
+            PunchMullion({ color: 'black', width: 2, subDiv: 4, top: 0.2, bottom: 0.2, left: 0.2, right: 0.2 })
 
         ],
     }
@@ -694,7 +707,7 @@ function debugCells({ cells, context, canvas }) {
 
 
 let Office = { Office90, Office80, Office60, Office50, Office30, Office20 }
-let Residential = {Residential90, Residential80}
+let Residential = { Residential90, Residential80 }
 
 
 export { Office, Residential }
