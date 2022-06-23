@@ -51,7 +51,7 @@ export function ParseRule(settings) {
     settings['rules'] = arr 
     return settings
 }
-/*
+
 
 export function CreateTexture(buildingAttributes, rule) {
 
@@ -70,7 +70,7 @@ export function CreateTexture(buildingAttributes, rule) {
 }
 
 
-*/
+
 
 
 function overideStyle(value, context) {
