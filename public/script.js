@@ -6,6 +6,8 @@ import sampleSolution from "./jsm/sampleSolution2.js";
 import { extrude, extrudeBlock } from "./jsm/3d-tools.js";
 import { TextureBlock } from "./libs/block-elements.js";
 import { presets } from "./libs/presets.js";
+
+import { getOffset } from "./jsm/clipper-tools.js";
 let container;
 let camera, scene, raycaster;
 let renderer, control, orbit;
@@ -147,6 +149,28 @@ function PlotTexture({ plots, blocks },settings) {
 
     return materials 
 
+/*  const footprintMeshes = Object.values(sampleSolution.plots).map((plot) => {
+    plot.footprint = sampleSolution.blocks[plot.children[0]].shape;
+    return extrude({
+      polygon: plot.footprint,
+      depth: 3,
+    });
+  });
+
+  const offsettedMeshes = Object.values(sampleSolution.plots).map((plot) => {
+    return extrude({
+      polygon: getOffset(plot.buildable, 5),
+      depth: 1.5,
+    });
+  });
+
+  scene.add(
+    ...plotMeshes,
+    ...buildableMeshes,
+    ...footprintMeshes,
+    ...offsettedMeshes
+  );
+*/
 }
 
 

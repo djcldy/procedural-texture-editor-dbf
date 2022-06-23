@@ -189,6 +189,25 @@ function ParseRule(settings) {
 }
 
 
+export function CreateTexture(buildingAttributes, rule) {
+
+
+    // let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
+
+    // const randomRule = rules[Math.floor(Math.random() * rules.length)];
+    //     // return TextureFactory(Office30(buildingAttributes))
+    // return TextureFactory(randomRule(buildingAttributes))
+
+
+    // return TextureFactory(Residential80(buildingAttributes))
+
+
+
+}
+
+
+
+
 
 function overideStyle(value, context) {
 
