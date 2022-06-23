@@ -278,7 +278,7 @@ function createPlots() {
     });
   });
 
-  const ofsettedMeshes = Object.values(sampleSolution.plots).map((plot) => {
+  const offsettedMeshes = Object.values(sampleSolution.plots).map((plot) => {
     return extrude({
       polygon: getOffset(plot.buildable, 5),
       depth: 1.5,
@@ -289,7 +289,7 @@ function createPlots() {
     ...plotMeshes,
     ...buildableMeshes,
     ...footprintMeshes,
-    ...ofsettedMeshes
+    ...offsettedMeshes
   );
 }
 
