@@ -97,7 +97,7 @@ function MapPlot(settings, overide) {
 
     let sf = 25 // scale factor
 
-    let { plotAttributes, /*rules*/ } = settings
+    let { plotAttributes, rules } = settings
     let { shape } = plotAttributes
     let { width, height, xMin, zMin } = getWorldBoundingBox(shape)
 
@@ -107,7 +107,7 @@ function MapPlot(settings, overide) {
     let { canvas, context } = initCanvas(width, height, sf)
     // if (overide) checkOverideArray(overide, rules) // this should be somewhere else 
 
-    let rules = [Background('red')]
+    // let rules = [Background('red')]
 
 
 
@@ -179,8 +179,11 @@ function ParseRule(settings) {
     let arr = []
     settings['rules'].forEach(f => {
         let meth = eval("(" + f + ")")
+        console.log(meth)
         arr.push(meth)
     })
+
+    console.log(JSON.stringify(arr[0],null,4))
     settings['rules'] = arr
     return settings
 }

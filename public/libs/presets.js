@@ -15,16 +15,13 @@ let obj = {
 
 
 
-obj['examples']['texture'] = {
+obj['examples']['plot'] = {
 
-    "name": "office-90%",
-    "cellWidth": 1.875,
-    "moduleWidth": 7.5,
-    "horizontalGrid": "[0, 0.25, 0.5, 0.75, 1]",
+    "name": "plot",
     "bumpMap": "[0, 0, 100, 150, 200]",
     "alphaMap": "[155, 255, 255, 255]",
     "rules": [
-        "Texture('#b8d7e1')",
+        "Debug('grey')"
     ]
 }
 

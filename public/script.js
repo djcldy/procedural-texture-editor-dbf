@@ -109,8 +109,8 @@ function applyMeshMaterials(meshes, materials) {
 }
 
 
-function PlotTexture({ plots, blocks }) {
-
+function PlotTexture({ plots, blocks },settings) {
+/*
     let settings = {
 
         "name": "test",
@@ -119,7 +119,7 @@ function PlotTexture({ plots, blocks }) {
         "rules": [
             "Background('grey')",
         ]
-    }
+    }*/
 
 
     let materials = []
@@ -225,8 +225,7 @@ function init() {
 
     initThreeJS()
     initListeners()
-    // initRequest()
-    ProceduralTextureMesh(sampleSolution)
+    initRequest()
 
 }
 
@@ -585,7 +584,7 @@ function createMesh() {
 
 
 function initRequest() {
-    let settings = presets["industrial"]["80"];
+    let settings = presets["examples"]["plot"];
     ruleText.value = JSON.stringify(settings, null, 4);
     submitFacadeRule();
 }
@@ -594,7 +593,10 @@ function submitFacadeRule() {
 
     ruleText.value = ruleText.value.replace(/\s+/g, "");
     clearScene();
-    applyRule(ruleText.value);
+    ProceduralTextureMesh(sampleSolution, ParseRequest(ruleText.value))
+    
+    // applyRule(ruleText.value); // shows the texture swatches
+
     ruleText.value = JSON.stringify(JSON.parse(ruleText.value), null, 4);
 
 }

@@ -9,7 +9,7 @@ var Debug = function(msg) {
 
     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
 
-        console.log('hi')
+        // console.log(msg)
 
     }
 
@@ -19,6 +19,26 @@ var Debug = function(msg) {
 
 
 
+
+
+// var Background = function(val) {
+
+//     let obj = {}
+
+//     // let color = val 
+
+
+//     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
+
+//         if (!overide) context.fillStyle = color
+//         context.fillRect(0, 0, canvas.width, canvas.height);
+
+//     }
+
+//     return obj.draw
+
+// }
 
 var Texture = function(image) {
 
@@ -34,13 +54,13 @@ var Texture = function(image) {
             return
         }
 
-        const image = new Image(100,100); // Using optional size for image
+        const image = new Image(100, 100); // Using optional size for image
         image.src = src
         image.onload = drawImageActualSize; // Draw when image has loaded
         console.log('image loaded')
 
-        function drawImageActualSize() {    
-            let {width,height} = canvas 
+        function drawImageActualSize() {
+            let { width, height } = canvas
             context.drawImage(this, 0, 0, width, height);
         }
 
@@ -97,11 +117,17 @@ function drawImageActualSize() {
 
 // }
 
-var Background = function(color) {
+
+
+var Background = function(val) {
 
     let obj = {}
 
+    // let color = val 
+
+
     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
 
         if (!overide) context.fillStyle = color
         context.fillRect(0, 0, canvas.width, canvas.height);
@@ -835,7 +861,7 @@ export {
     PunchWindow,
     StripWindow,
     StripMullion,
-    Texture, 
+    Texture,
     RandomHorizontal,
     Replace
 
