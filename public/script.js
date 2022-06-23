@@ -7,12 +7,13 @@ import { extrude, extrudeBlock } from "./jsm/3d-tools.js";
 import { TextureBlock } from "./libs/block-elements.js";
 import { presets } from "./libs/presets.js";
 
-import { getOffset } from "./jsm/clipper-tools.js";
+
+
+
 let container;
 let camera, scene, raycaster;
 let renderer, control, orbit;
 let cubeMap;
-
 let INTERSECTED;
 let theta = 0;
 const mouse = new THREE.Vector2();
@@ -39,6 +40,8 @@ ruleText.addEventListener("keypress", function(event) {
 
 
 var ele = document.getElementById("sel");
+
+
 
 for (let prop in presets) {
     for (let step in presets[prop]) {
@@ -75,13 +78,13 @@ animate();
 
 
 
-function ProceduralTextureMesh(solution, settings) {
+function ProceduralTextureMesh(solution, plotSettings, facadeSettings) {
 
 
-    let plotMaterials = PlotTexture(solution, settings)
+    let plotMaterials = PlotTexture(solution, plotSettings)
     let plotMeshes = PlotMesh(solution)
     // let buildingMaterials = BuildingTexture(solution)
-    // let buildingMeshes = BuildingMesh(solution)
+    let buildingMeshes = BuildingMesh(solution,facadeSettings)
 
     applyMeshMaterials(plotMeshes, plotMaterials)
     // ApplyMaterialsArr(buildingMeshes, buildingMaterials)
@@ -100,28 +103,28 @@ function ProceduralTextureMesh(solution, settings) {
 function applyMeshMaterials(meshes, materials) {
 
 
-  for (var i = 0; i < meshes.length; i++){
+    for (var i = 0; i < meshes.length; i++) {
 
-    meshes[i].material = materials[i]
+        meshes[i].material = materials[i]
 
-  }
+    }
 
-  return meshes 
+    return meshes
 
 }
 
 
-function PlotTexture({ plots, blocks },settings) {
-/*
-    let settings = {
+function PlotTexture({ plots, blocks }, settings) {
+    /*
+        let settings = {
 
-        "name": "test",
-        "bumpMap": "[0, 0, 100, 150, 200]",
-        "alphaMap": "[155, 255, 255, 255]",
-        "rules": [
-            "Background('grey')",
-        ]
-    }*/
+            "name": "test",
+            "bumpMap": "[0, 0, 100, 150, 200]",
+            "alphaMap": "[155, 255, 255, 255]",
+            "rules": [
+                "Background('grey')",
+            ]
+        }*/
 
 
     let materials = []
@@ -137,47 +140,47 @@ function PlotTexture({ plots, blocks },settings) {
 
         let { shape, buildable, /*footprint*/ } = plot
         settings['plotAttributes'] = { shape, buildable, /*footprint*/ }
-        let {diffuse,alpha,bump} = GenerateTexture(settings, 'plot')
+        let { diffuse, alpha, bump } = GenerateTexture(settings, 'plot')
         let material = mat.clone()
         // console.log(diffuse)
-        material.map = diffuse 
+        material.map = diffuse
         // material.alphaMap = alpha
         // material.bumpMap = bump 
         materials.push(material)
 
     })
 
-    return materials 
+    return materials
 
-/*  const footprintMeshes = Object.values(sampleSolution.plots).map((plot) => {
-    plot.footprint = sampleSolution.blocks[plot.children[0]].shape;
-    return extrude({
-      polygon: plot.footprint,
-      depth: 3,
-    });
-  });
+    /*  const footprintMeshes = Object.values(sampleSolution.plots).map((plot) => {
+        plot.footprint = sampleSolution.blocks[plot.children[0]].shape;
+        return extrude({
+          polygon: plot.footprint,
+          depth: 3,
+        });
+      });
 
-  const offsettedMeshes = Object.values(sampleSolution.plots).map((plot) => {
-    return extrude({
-      polygon: getOffset(plot.buildable, 5),
-      depth: 1.5,
-    });
-  });
+      const offsettedMeshes = Object.values(sampleSolution.plots).map((plot) => {
+        return extrude({
+          polygon: getOffset(plot.buildable, 5),
+          depth: 1.5,
+        });
+      });
 
-  scene.add(
-    ...plotMeshes,
-    ...buildableMeshes,
-    ...footprintMeshes,
-    ...offsettedMeshes
-  );
-*/
+      scene.add(
+        ...plotMeshes,
+        ...buildableMeshes,
+        ...footprintMeshes,
+        ...offsettedMeshes
+      );
+    */
 }
 
 
 
 function PlotMesh({ plots, blocks }) {
 
-  console.log('create mesh')
+    console.log('create mesh')
 
     const meshes = Object.values(plots).map((plot) => {
         return extrude({
@@ -209,7 +212,32 @@ function PlotMesh({ plots, blocks }) {
 }
 
 
-function GetBuildingMesh() {
+function BuildingMesh({ blocks }, settings) {
+
+    let buildingColorHex = "#777777";
+    let slabColorHex = "#000000";
+
+
+
+    Object.values(blocks).map((block) => {
+        let meshes = TextureBlock(block);
+
+        meshes.forEach((mesh) => {
+            let { width } = mesh;
+            settings["buildingAttributes"] = {
+                totalHeight: block.f2f * block.floors,
+                floorHeight: block.f2f,
+                totalWidth: width,
+                slabThickness: 0.5,
+                buildingColorHex: "#777777",
+                slabColorHex: "#000000",
+            };
+            mesh.material = GetFacadeMaterial(settings);
+
+            scene.add(mesh);
+        });
+    });
+ AddSlabs()
 
 
 
@@ -391,7 +419,7 @@ function MergeObjects(obj1, obj2) {
 function GetFacadeMaterial(settings, rule) {
     let buildingColorHex = "#777777";
     let slabColorHex = "#000000";
-    let { diffuse, alpha, bump } = CreateTexture(settings, rule);
+    let { diffuse, alpha, bump } = GenerateTexture(settings, 'facade');
 
     let material = new THREE.MeshPhongMaterial({
         map: diffuse,
@@ -608,17 +636,21 @@ function createMesh() {
 
 
 function initRequest() {
-    let settings = presets["examples"]["plot"];
+    let settings = presets["office"]["20"]
+
     ruleText.value = JSON.stringify(settings, null, 4);
     submitFacadeRule();
 }
 
 function submitFacadeRule() {
 
+    let plotSettings = presets["examples"]["plot"]
+
+
     ruleText.value = ruleText.value.replace(/\s+/g, "");
     clearScene();
-    ProceduralTextureMesh(sampleSolution, ParseRequest(ruleText.value))
-    
+    ProceduralTextureMesh(sampleSolution, plotSettings, ParseRequest(ruleText.value))
+
     // applyRule(ruleText.value); // shows the texture swatches
 
     ruleText.value = JSON.stringify(JSON.parse(ruleText.value), null, 4);

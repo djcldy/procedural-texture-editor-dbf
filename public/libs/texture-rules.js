@@ -1,6 +1,6 @@
 import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
 
-
+import { getOffset } from "../jsm/clipper-tools.js";
 
 
 var Debug = function(msg) {
@@ -71,52 +71,6 @@ var Texture = function(image) {
 }
 
 
-/*
-var Texture = function(){
-
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-
-const image = new Image(60, 45); // Using optional size for image
-image.onload = drawImageActualSize; // Draw when image has loaded
-
-// Load an image of intrinsic size 300x227 in CSS pixels
-image.src = 'rhino.jpg';
-
-function drawImageActualSize() {
-  // Use the intrinsic size of image in CSS pixels for the canvas element
-  canvas.width = this.naturalWidth;
-  canvas.height = this.naturalHeight;
-
-  // Will draw the image as 300x227, ignoring the custom size of 60x45
-  // given in the constructor
-  ctx.drawImage(this, 0, 0);
-
-  // To use the custom size we'll have to specify the scale parameters
-  // using the element's width and height properties - lets draw one
-  // on top in the corner:
-  ctx.drawImage(this, 0, 0, this.width, this.height);
-}
-*/
-
-// var Background = function(diffuse) {
-
-
-//     console.log('color', diffuse)
-
-//     let obj = {}
-
-//     obj.draw = function({ canvas, context}, overide) {
-
-//         if (!overide) context.fillStyle = color;
-//         // context.fillRect(0, 0, canvas.width, canvas.height);
-
-//     }
-
-//     return obj.draw
-
-// }
-
 
 
 var Background = function(val) {
@@ -129,12 +83,70 @@ var Background = function(val) {
     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
 
 
-        if (!overide) context.fillStyle = color
+        if (!overide) context.fillStyle = val
         context.fillRect(0, 0, canvas.width, canvas.height);
 
     }
 
     return obj.draw
+
+}
+
+
+var OffsetEdge = function({ distance /*, polygon*/ }) {
+
+    let obj = {}
+
+
+
+
+    obj.draw = function({ settings, canvas, context, plotAttributes, bbox, sf }, overide) {
+
+        let off = getOffset(plotAttributes['shape'], 25)
+
+
+        let polygon = normalizePolygon(off, bbox, sf)
+        // if (!overide) context.fillStyle = 'whi'
+
+        context.strokeStyle = 'white';
+        context.lineWidth = 5;
+
+
+        context.stroke();
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.lineTo(canvas.width, canvas.height);
+        context.lineTo(canvas.width, 0);
+        context.lineTo(0,canvas.height);
+        context.closePath();
+
+    }
+
+    return obj.draw
+
+}
+
+
+function normalizePolygon(polygon, { xMin, zMin }, sf) {
+
+    console.log('normalizePolygon', polygon)
+
+    let arr = []
+
+    polygon.forEach(o => {
+
+        let { x, y, z } = o
+
+        let xn = x - xMin
+        let yn = 0
+        let zn = z - zMin
+
+        arr.push({ x: xn * sf, y: yn, z: zn * sf })
+
+    })
+
+    return arr
+
 
 }
 
@@ -150,8 +162,6 @@ var CurtainWall = function(diffuse) {
         if (!overide) context.fillStyle = diffuse
 
         for (var x = 0; x < canvas.width; x += stepX) {
-
-
 
             drawBay({ context, xPos: x, yPos: 0, stepX, stepY })
         }
@@ -857,6 +867,7 @@ export {
     Horizontal,
     MullionVertical,
     MullionHorizontal,
+    OffsetEdge,
     PunchMullion,
     PunchWindow,
     StripWindow,

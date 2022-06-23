@@ -10,6 +10,7 @@ import {
     drawHorizontals,
     MullionVertical,
     MullionHorizontal,
+    OffsetEdge,
     PunchWindow,
     PunchMullion,
     Horizontal,
@@ -27,28 +28,28 @@ export function GenerateTexture(settings, type) {
 
     settings = ParseRule(settings)
 
-    // console.log(settings)
+    if (type === 'plot') {
 
-    let map = MapPlot // texturemap plot 
+        let map = MapPlot // texturemap plot 
+        let { diffuse, alpha, bump } = TextureFactory(settings, map)
+        diffuse = createTexture(diffuse)
+        alpha = createTexture(alpha)
+        bump = createTexture(bump)
+        return { diffuse, alpha, bump }
+    }
 
-    let { diffuse, alpha, bump } = TextureFactory(settings, map)
+    if (type === 'facade') {
 
-    // let repeat = { x: 1, y: 1 }
+        let repeat = getTilingParameter(settings)
+        let map = MapFacade // texturemap plot 
+        let { diffuse, alpha, bump } = TextureFactory(settings, map)
+        diffuse = RepeatTexture(diffuse, repeat)
+        alpha = RepeatTexture(alpha, repeat)
+        bump = RepeatTexture(bump, repeat)
+        return { diffuse, alpha, bump }
+    }
 
-    // if (type === 'building') repeat = getTilingParameter(settings)
 
-
-    // console.log('diffuse', diffuse)
-
-    // RepeatTexture(diffuse, repeat)
-    // RepeatTexture(alpha, repeat)
-    // RepeatTexture(bump, repeat)
-
-    diffuse = createTexture(diffuse)
-    alpha = createTexture(alpha)
-    bump = createTexture(bump)
-
-    return { diffuse, alpha, bump }
 
 }
 
@@ -97,9 +98,12 @@ function MapPlot(settings, overide) {
 
     let sf = 25 // scale factor
 
-    let { plotAttributes, rules } = settings
+    let { plotAttributes, /*rules*/ } = settings
     let { shape } = plotAttributes
-    let { width, height, xMin, zMin } = getWorldBoundingBox(shape)
+    getWorldBoundingBox(shape)
+    let bbox = getWorldBoundingBox(shape)
+    let { width, height, xMin, zMin } = bbox
+
 
     console.log('width, height', width, height)
 
@@ -107,14 +111,19 @@ function MapPlot(settings, overide) {
     let { canvas, context } = initCanvas(width, height, sf)
     // if (overide) checkOverideArray(overide, rules) // this should be somewhere else 
 
-    // let rules = [Background('red')]
+    let rules = [
+
+        Background('red'),
+        OffsetEdge({ distance: 3, polygon: 'shape' })
+
+    ]
 
 
 
     for (var i = 0; i < rules.length; i++) {
 
         if (overide) overideStyle(overide[i], context)
-        rules[i]({ settings, canvas, context, stepX: null, stepY: null, cells: null, horizontalGrid: null }, overide)
+        rules[i]({ settings, canvas, context, plotAttributes, bbox, sf }, overide)
     }
 
     return canvas;
@@ -149,7 +158,7 @@ function getWorldBoundingBox(pts) {
 function MapFacade(settings, overide) {
 
 
-    let { cellWidth, moduleWidth, buildingAttributes, rules, horizontalGrid } = settings
+    let { cellWidth, moduleWidth, buildingAttributes, /*rules,*/ horizontalGrid } = settings
     let { floorHeight } = buildingAttributes
     let sf = 25 // scale factor
     let { canvas, context } = initCanvas(moduleWidth, floorHeight, sf)
@@ -158,13 +167,20 @@ function MapFacade(settings, overide) {
     let cells = GetGridCells({ moduleWidth, cellWidth, horizontalGrid }, canvas, sf)
 
 
+    let rules = [
+        CurtainWall('#b8d7e1'),
+        MullionVertical({ color: 'white', width: 2, start: 0, end: 1 }),
+        MullionHorizontal({ color: 'white', width: 2, start: 0, end: 1 }),
+        MullionHorizontal({ color: 'white', width: 4, start: 0.1, end: 0.9 }),
+    ]
+
     if (overide) checkOverideArray(overide, rules)
 
 
     for (var i = 0; i < rules.length; i++) {
 
-        // if (overide) overideStyle(overide[i], context)
-        // rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
+        if (overide) overideStyle(overide[i], context)
+        rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
 
     }
 
@@ -179,11 +195,11 @@ function ParseRule(settings) {
     let arr = []
     settings['rules'].forEach(f => {
         let meth = eval("(" + f + ")")
-        console.log(meth)
+        // console.log(meth)
         arr.push(meth)
     })
 
-    console.log(JSON.stringify(arr[0],null,4))
+    // console.log(JSON.stringify(arr[0], null, 4))
     settings['rules'] = arr
     return settings
 }
