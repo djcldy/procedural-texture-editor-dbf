@@ -23,51 +23,136 @@ import {
 
 
 
+export function GenerateTexture(settings, type) {
 
-export function ProceduralPlotTexture(settings) {
+    settings = ParseRule(settings)
+
+    // console.log(settings)
+
+    let map = MapPlot // texturemap plot 
+
+    let { diffuse, alpha, bump } = TextureFactory(settings, map)
+
+    // let repeat = { x: 1, y: 1 }
+
+    // if (type === 'building') repeat = getTilingParameter(settings)
 
 
-    return PlotTextureFactory(ParseRule(settings))
+    // console.log('diffuse', diffuse)
+
+    // RepeatTexture(diffuse, repeat)
+    // RepeatTexture(alpha, repeat)
+    // RepeatTexture(bump, repeat)
+
+    diffuse = createTexture(diffuse)
+    alpha = createTexture(alpha)
+    bump = createTexture(bump)
+
+    return { diffuse, alpha, bump }
+
+}
 
 
+function createTexture(map) {
+
+    let texture = new THREE.Texture(map)
+    texture.encoding = THREE.sRGBEncoding;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.needsUpdate = true;
+    texture.encoding = THREE.sRGBEncoding;
+    texture.anisotropy = 16;
+    return texture
 
 }
 
 
 
-export function GenerateTexture(settings) {
+function getTilingParameter(settings) {
 
-    return TextureFactory(ParseRule(settings))
+    let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes
+    let { moduleWidth } = settings
+    let numFloors = totalHeight / floorHeight
+    let numModules = totalWidth / moduleWidth
+    return { x: numModules, y: numFloors }
 
 }
 
-
-function PlotTextureFactory(settings) {
-
-
+function TextureFactory(settings, map) {
 
     let { bumpMap, alphaMap } = settings
 
-    let diffuse = Map(settings, false)
-    let alpha = Map(settings, alphaMap)
-    let bump = Map(settings, bumpMap)
-    
+    let diffuse = map(settings, false)
+    let alpha = map(settings, alphaMap)
+    let bump = map(settings, bumpMap)
+
     return { diffuse, alpha, bump }
 
 }
 
 
 
+function MapPlot(settings, overide) {
 
 
-function Map(settings, overide) {
+    let sf = 25 // scale factor
+
+    let { plotAttributes, /*rules*/ } = settings
+    let { shape } = plotAttributes
+    let { width, height, xMin, zMin } = getWorldBoundingBox(shape)
+
+    console.log('width, height', width, height)
+
+
+    let { canvas, context } = initCanvas(width, height, sf)
+    // if (overide) checkOverideArray(overide, rules) // this should be somewhere else 
+
+    let rules = [Background('red')]
+
+
+
+    for (var i = 0; i < rules.length; i++) {
+
+        if (overide) overideStyle(overide[i], context)
+        rules[i]({ settings, canvas, context, stepX: null, stepY: null, cells: null, horizontalGrid: null }, overide)
+    }
+
+    return canvas;
+
+}
+
+
+function getWorldBoundingBox(pts) {
+
+    let zMin, zMax
+    let xMin = zMin = 10000000
+    let xMax = zMax = -10000000
+
+    pts.forEach(p => {
+
+        let { x, z } = p
+        if (x > xMax) xMax = x
+        if (z > zMax) zMax = z
+        if (x < xMin) xMin = x
+        if (z < zMin) zMin = z
+
+    })
+
+    let width = xMax - xMin
+    let height = zMax - zMin
+
+    return { xMax, xMin, zMax, zMin, width, height }
+
+}
+
+
+function MapFacade(settings, overide) {
 
 
     let { cellWidth, moduleWidth, buildingAttributes, rules, horizontalGrid } = settings
     let { floorHeight } = buildingAttributes
-    let windowRatio = 0.1
     let sf = 25 // scale factor
-    let { canvas, context } = initCanvas({ floorHeight, moduleWidth })
+    let { canvas, context } = initCanvas(moduleWidth, floorHeight, sf)
     let stepY = canvas.height
     let stepX = cellWidth * sf
     let cells = GetGridCells({ moduleWidth, cellWidth, horizontalGrid }, canvas, sf)
@@ -76,12 +161,10 @@ function Map(settings, overide) {
     if (overide) checkOverideArray(overide, rules)
 
 
-
-
     for (var i = 0; i < rules.length; i++) {
 
-        if (overide) overideStyle(overide[i], context)
-        rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
+        // if (overide) overideStyle(overide[i], context)
+        // rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
 
     }
 
@@ -91,7 +174,7 @@ function Map(settings, overide) {
 
 
 
-export function ParseRule(settings) {
+function ParseRule(settings) {
     let params = { settings: null, canvas: null, context: null, stepX: null, stepY: null }
     let arr = []
     settings['rules'].forEach(f => {
@@ -101,26 +184,7 @@ export function ParseRule(settings) {
     settings['rules'] = arr
     return settings
 }
-/*
 
-export function CreateTexture(buildingAttributes, rule) {
-
-
-    // let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
-
-    // const randomRule = rules[Math.floor(Math.random() * rules.length)];
-    //     // return TextureFactory(Office30(buildingAttributes))
-    // return TextureFactory(randomRule(buildingAttributes))
-
-
-    // return TextureFactory(Residential80(buildingAttributes))
-
-
-
-}
-
-
-*/
 
 
 function overideStyle(value, context) {
@@ -132,25 +196,6 @@ function overideStyle(value, context) {
 
 
 
-function TextureFactory(settings) {
-
-
-    let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes
-    let { moduleWidth } = settings
-
-    let numFloors = totalHeight / floorHeight
-    let numModules = totalWidth / moduleWidth
-
-    let repeat = { x: numModules, y: numFloors }
-    let { bumpMap, alphaMap } = settings
-
-    let diffuse = RepeatTexture(Map(settings, false), repeat)
-    let alpha = RepeatTexture(Map(settings, alphaMap), repeat)
-    let bump = RepeatTexture(Map(settings, bumpMap), repeat)
-
-    return { diffuse, alpha, bump }
-
-}
 
 
 function RepeatTexture(map, repeat) {
@@ -177,12 +222,9 @@ function RepeatTexture(map, repeat) {
     texture.encoding = THREE.sRGBEncoding;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    // diffuse.repeat = new THREE.Vector2(numBays, numFloors)
     texture.needsUpdate = true;
     texture.encoding = THREE.sRGBEncoding;
     texture.anisotropy = 16;
-
-    console.log('repeat texture')
 
     return texture
 
@@ -192,34 +234,6 @@ function RepeatTexture(map, repeat) {
 
 
 
-function Map(settings, overide) {
-
-
-    let { cellWidth, moduleWidth, buildingAttributes, rules, horizontalGrid } = settings
-    let { floorHeight } = buildingAttributes
-    let windowRatio = 0.1
-    let sf = 25 // scale factor
-    let { canvas, context } = initCanvas({ floorHeight, moduleWidth })
-    let stepY = canvas.height
-    let stepX = cellWidth * sf
-    let cells = GetGridCells({ moduleWidth, cellWidth, horizontalGrid }, canvas, sf)
-
-
-    if (overide) checkOverideArray(overide, rules)
-
-
-
-
-    for (var i = 0; i < rules.length; i++) {
-
-        if (overide) overideStyle(overide[i], context)
-        rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
-
-    }
-
-    return canvas;
-
-}
 
 function checkOverideArray(overide, rules) {
 
@@ -237,15 +251,12 @@ function checkOverideArray(overide, rules) {
 }
 
 
-function initCanvas({ moduleWidth, floorHeight }) {
+function initCanvas(width, height, scaleFactor) {
 
-    let sf = 25 // scale factor
+    let sf = 25 || scaleFactor // scale factor
     let canvas = document.createElement('canvas');
-    canvas.width = moduleWidth * sf
-    canvas.height = floorHeight * sf
-
-    // console.log(canvas.width)
-
+    canvas.width = width * sf
+    canvas.height = height * sf
     let context = canvas.getContext('2d')
     context.fillStyle = '#ffffff';
     context.fillRect(0, 0, canvas.width, canvas.height);

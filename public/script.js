@@ -73,18 +73,18 @@ animate();
 
 
 
-function ProceduralTextureMesh(solution) {
+function ProceduralTextureMesh(solution, settings) {
 
 
-    let plotMaterials = PlotTexture(solution)
-    // let plotMeshes = PlotMesh(solution)
+    let plotMaterials = PlotTexture(solution, settings)
+    let plotMeshes = PlotMesh(solution)
     // let buildingMaterials = BuildingTexture(solution)
     // let buildingMeshes = BuildingMesh(solution)
 
-    // ApplyMaterialsArr(plotMeshes, plotMaterials)
+    applyMeshMaterials(plotMeshes, plotMaterials)
     // ApplyMaterialsArr(buildingMeshes, buildingMaterials)
 
-    // scene.add(...buildingMeshes, ...plotMeshes)
+    scene.add(...plotMeshes)
 
 }
 
@@ -98,42 +98,54 @@ function ProceduralTextureMesh(solution) {
 function applyMeshMaterials(meshes, materials) {
 
 
+  for (var i = 0; i < meshes.length; i++){
 
+    meshes[i].material = materials[i]
 
+  }
 
+  return meshes 
 
 }
 
 
-function PlotTexture() {
+function PlotTexture({ plots, blocks }) {
 
     let settings = {
 
         "name": "test",
+        "bumpMap": "[0, 0, 100, 150, 200]",
+        "alphaMap": "[155, 255, 255, 255]",
         "rules": [
-            // "CurtainWall('#eaf7fe')",
+            "Background('grey')",
         ]
     }
 
 
     let materials = []
 
-    l
+    let mat = new THREE.MeshPhongMaterial({
+        bumpScale: 1,
+        reflectivity: 0.3,
+        transparent: true,
+    });
 
 
     let arr = Object.values(plots).map((plot) => {
 
-        let { shape, buildable, footprint } = plot
-        settings['plotAttributes'] = { shape, buildable, footprint }
-
-
-
-
+        let { shape, buildable, /*footprint*/ } = plot
+        settings['plotAttributes'] = { shape, buildable, /*footprint*/ }
+        let {diffuse,alpha,bump} = GenerateTexture(settings, 'plot')
+        let material = mat.clone()
+        // console.log(diffuse)
+        material.map = diffuse 
+        // material.alphaMap = alpha
+        // material.bumpMap = bump 
+        materials.push(material)
 
     })
 
-
-
+    return materials 
 
 }
 
@@ -141,12 +153,15 @@ function PlotTexture() {
 
 function PlotMesh({ plots, blocks }) {
 
-    const boundaries = Object.values(plots).map((plot) => {
+  console.log('create mesh')
+
+    const meshes = Object.values(plots).map((plot) => {
         return extrude({
             polygon: plot.shape,
             depth: 0.1,
         });
     });
+
 
     /*    const buildableArea = Object.values(plots).map((plot) => {
             return extrude({
@@ -165,7 +180,7 @@ function PlotMesh({ plots, blocks }) {
         });*/
 
 
-    return { boundaries }
+    return meshes
 
 }
 
@@ -210,7 +225,7 @@ function init() {
 
     initThreeJS()
     initListeners()
-    initRequest()
+    // initRequest()
     ProceduralTextureMesh(sampleSolution)
 
 }

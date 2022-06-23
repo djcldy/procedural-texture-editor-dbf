@@ -79,13 +79,31 @@ function drawImageActualSize() {
 }
 */
 
+// var Background = function(diffuse) {
+
+
+//     console.log('color', diffuse)
+
+//     let obj = {}
+
+//     obj.draw = function({ canvas, context}, overide) {
+
+//         if (!overide) context.fillStyle = color;
+//         // context.fillRect(0, 0, canvas.width, canvas.height);
+
+//     }
+
+//     return obj.draw
+
+// }
+
 var Background = function(color) {
 
     let obj = {}
 
     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
 
-        if (!overide) context.fillStyle = color;
+        if (!overide) context.fillStyle = color
         context.fillRect(0, 0, canvas.width, canvas.height);
 
     }
@@ -93,7 +111,6 @@ var Background = function(color) {
     return obj.draw
 
 }
-
 
 
 
@@ -105,12 +122,6 @@ var CurtainWall = function(diffuse) {
 
 
         if (!overide) context.fillStyle = diffuse
-
-        // var value = Math.floor(Math.random() * 64);
-        // context.fillStyle = 'rgb(' + [34, 155 + value, 215].join(',') + ')';
-
-        // // context.fillStyle = color
-        // setColor(context, channel, index, settings, diffuse)
 
         for (var x = 0; x < canvas.width; x += stepX) {
 
