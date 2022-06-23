@@ -270,8 +270,9 @@ function createPlots() {
   });
 
   const footprintMeshes = Object.values(sampleSolution.plots).map((plot) => {
+    plot.footprint = sampleSolution.blocks[plot.children[0]].shape;
     return extrude({
-      polygon: sampleSolution.blocks[plot.children[0]].shape,
+      polygon: plot.footprint,
       depth: 2,
     });
   });
