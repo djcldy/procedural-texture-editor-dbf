@@ -26,9 +26,6 @@ var Texture = function(image) {
 
     let src = 'rhino.jpg';
 
-
-    // image.src = 'rhino.jpg';
-
     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
 
         if (!overide) {
@@ -42,24 +39,8 @@ var Texture = function(image) {
         image.onload = drawImageActualSize; // Draw when image has loaded
         console.log('image loaded')
 
-
-        function drawImageActualSize() {
-
-            console.log('draw image actual size')
-            console.log(image)
-            // Use the intrinsic size of image in CSS pixels for the canvas element
-    
+        function drawImageActualSize() {    
             let {width,height} = canvas 
-
-            console.log(width,height)
-
-            // Will draw the image as 300x227, ignoring the custom size of 60x45
-            // given in the constructor
-            // context.drawImage(this, 0, 0);
-
-            // To use the custom size we'll have to specify the scale parameters
-            // using the element's width and height properties - lets draw one
-            // on top in the corner:
             context.drawImage(this, 0, 0, width, height);
         }
 

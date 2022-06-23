@@ -1,16 +1,6 @@
 console.log('procedural-texture.js')
 
 import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
-// import {
-//     Commercial90,
-//     Residential, 
-//     Office,
-//     Industrial90,
-//     Recreational90,
-//     Institutional90,
-//     Institutional50,
-//     CustomRule
-// } from './texture-presets.js'
 
 import {
     Background,
@@ -33,6 +23,18 @@ import {
 
 
 
+
+export function ProceduralPlotTexture(settings) {
+
+
+    return PlotTextureFactory(ParseRule(settings))
+
+
+
+}
+
+
+
 export function GenerateTexture(settings) {
 
     return TextureFactory(ParseRule(settings))
@@ -40,15 +42,63 @@ export function GenerateTexture(settings) {
 }
 
 
+function PlotTextureFactory(settings) {
+
+
+
+    let { bumpMap, alphaMap } = settings
+
+    let diffuse = Map(settings, false)
+    let alpha = Map(settings, alphaMap)
+    let bump = Map(settings, bumpMap)
+    
+    return { diffuse, alpha, bump }
+
+}
+
+
+
+
+
+function Map(settings, overide) {
+
+
+    let { cellWidth, moduleWidth, buildingAttributes, rules, horizontalGrid } = settings
+    let { floorHeight } = buildingAttributes
+    let windowRatio = 0.1
+    let sf = 25 // scale factor
+    let { canvas, context } = initCanvas({ floorHeight, moduleWidth })
+    let stepY = canvas.height
+    let stepX = cellWidth * sf
+    let cells = GetGridCells({ moduleWidth, cellWidth, horizontalGrid }, canvas, sf)
+
+
+    if (overide) checkOverideArray(overide, rules)
+
+
+
+
+    for (var i = 0; i < rules.length; i++) {
+
+        if (overide) overideStyle(overide[i], context)
+        rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
+
+    }
+
+    return canvas;
+
+}
+
+
 
 export function ParseRule(settings) {
-    let params = {settings: null, canvas:null, context:null, stepX: null, stepY:null}
+    let params = { settings: null, canvas: null, context: null, stepX: null, stepY: null }
     let arr = []
     settings['rules'].forEach(f => {
         let meth = eval("(" + f + ")")
         arr.push(meth)
     })
-    settings['rules'] = arr 
+    settings['rules'] = arr
     return settings
 }
 /*
@@ -84,7 +134,6 @@ function overideStyle(value, context) {
 
 function TextureFactory(settings) {
 
-    // let buildingAttri/butes = settings 
 
     let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes
     let { moduleWidth } = settings
@@ -93,7 +142,7 @@ function TextureFactory(settings) {
     let numModules = totalWidth / moduleWidth
 
     let repeat = { x: numModules, y: numFloors }
-    let { bumpMap, alphaMap, /*repeat*/ } = settings
+    let { bumpMap, alphaMap } = settings
 
     let diffuse = RepeatTexture(Map(settings, false), repeat)
     let alpha = RepeatTexture(Map(settings, alphaMap), repeat)
@@ -145,7 +194,6 @@ function RepeatTexture(map, repeat) {
 
 function Map(settings, overide) {
 
-    console.log('map!')
 
     let { cellWidth, moduleWidth, buildingAttributes, rules, horizontalGrid } = settings
     let { floorHeight } = buildingAttributes
@@ -176,15 +224,11 @@ function Map(settings, overide) {
 function checkOverideArray(overide, rules) {
 
     let defaultValue = 255
-
-
     if (overide.length >= rules.length) return
-
 
     let delta = rules.length - overide.length
 
     for (var i = 0; i < delta.length; i++) {
-
         overide.push(defaultValue)
     }
 
