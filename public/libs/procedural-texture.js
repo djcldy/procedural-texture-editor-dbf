@@ -25,6 +25,7 @@ import {
     Horizontal,
     StripWindow,
     StripMullion,
+    Texture,
     RandomHorizontal,
     Replace,
     Frame
@@ -50,7 +51,7 @@ export function ParseRule(settings) {
     settings['rules'] = arr 
     return settings
 }
-
+/*
 
 export function CreateTexture(buildingAttributes, rule) {
 
@@ -69,7 +70,7 @@ export function CreateTexture(buildingAttributes, rule) {
 }
 
 
-
+*/
 
 
 function overideStyle(value, context) {
@@ -94,16 +95,16 @@ function TextureFactory(settings) {
     let repeat = { x: numModules, y: numFloors }
     let { bumpMap, alphaMap, /*repeat*/ } = settings
 
-    let diffuse = Texture(Map(settings, false), repeat)
-    let alpha = Texture(Map(settings, alphaMap), repeat)
-    let bump = Texture(Map(settings, bumpMap), repeat)
+    let diffuse = RepeatTexture(Map(settings, false), repeat)
+    let alpha = RepeatTexture(Map(settings, alphaMap), repeat)
+    let bump = RepeatTexture(Map(settings, bumpMap), repeat)
 
     return { diffuse, alpha, bump }
 
 }
 
 
-function Texture(map, repeat) {
+function RepeatTexture(map, repeat) {
 
 
     let rows = []
@@ -131,6 +132,8 @@ function Texture(map, repeat) {
     texture.needsUpdate = true;
     texture.encoding = THREE.sRGBEncoding;
     texture.anisotropy = 16;
+
+    console.log('repeat texture')
 
     return texture
 

@@ -1,7 +1,7 @@
 import * as THREE from "./jsm/three.module.js";
 import { OrbitControls } from "./jsm/OrbitControls.js";
 import { TransformControls } from "./jsm/TransformControls.js";
-import { CreateTexture, GenerateTexture } from "./libs/procedural-texture.js";
+import { GenerateTexture } from "./libs/procedural-texture.js";
 import sampleSolution from "./jsm/sampleSolution.js";
 import { extrudeBlock } from "./jsm/3d-tools.js";
 import { TextureBlock } from "./libs/block-elements.js";
@@ -245,7 +245,7 @@ function RequestMaterial(settings) {
 
 function GetFacadeMaterial(settings, rule) {
 
-    let buildingColorHex = "#777777";
+/*    let buildingColorHex = "#777777";
     let slabColorHex = "#000000";
     let { diffuse, alpha, bump } = CreateTexture(settings, rule);
 
@@ -271,7 +271,7 @@ function GetFacadeMaterial(settings, rule) {
         map: diffuse,
     });
 
-    return material;
+    return material;*/
 }
 
 
@@ -488,7 +488,7 @@ function init() {
 
 function initRequest() {
 
-    let settings = presets['industrial']['80']
+    let settings = presets['examples']['texture']
     ruleText.value = JSON.stringify(settings, null, 4)
     submitFacadeRule()
 

@@ -20,6 +20,84 @@ var Debug = function(msg) {
 
 
 
+var Texture = function(image) {
+
+    let obj = {}
+
+    let src = 'rhino.jpg';
+
+
+    // image.src = 'rhino.jpg';
+
+    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
+        if (!overide) {
+            // context.fillStyle = color;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            return
+        }
+
+        const image = new Image(100,100); // Using optional size for image
+        image.src = src
+        image.onload = drawImageActualSize; // Draw when image has loaded
+        console.log('image loaded')
+
+
+        function drawImageActualSize() {
+
+            console.log('draw image actual size')
+            console.log(image)
+            // Use the intrinsic size of image in CSS pixels for the canvas element
+    
+            let {width,height} = canvas 
+
+            console.log(width,height)
+
+            // Will draw the image as 300x227, ignoring the custom size of 60x45
+            // given in the constructor
+            // context.drawImage(this, 0, 0);
+
+            // To use the custom size we'll have to specify the scale parameters
+            // using the element's width and height properties - lets draw one
+            // on top in the corner:
+            context.drawImage(this, 0, 0, width, height);
+        }
+
+    }
+
+    return obj.draw
+
+}
+
+
+/*
+var Texture = function(){
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const image = new Image(60, 45); // Using optional size for image
+image.onload = drawImageActualSize; // Draw when image has loaded
+
+// Load an image of intrinsic size 300x227 in CSS pixels
+image.src = 'rhino.jpg';
+
+function drawImageActualSize() {
+  // Use the intrinsic size of image in CSS pixels for the canvas element
+  canvas.width = this.naturalWidth;
+  canvas.height = this.naturalHeight;
+
+  // Will draw the image as 300x227, ignoring the custom size of 60x45
+  // given in the constructor
+  ctx.drawImage(this, 0, 0);
+
+  // To use the custom size we'll have to specify the scale parameters
+  // using the element's width and height properties - lets draw one
+  // on top in the corner:
+  ctx.drawImage(this, 0, 0, this.width, this.height);
+}
+*/
+
 var Background = function(color) {
 
     let obj = {}
@@ -505,15 +583,83 @@ var PunchMullion = function({ color, top, bottom, left, right, width, subDiv, re
 
         let w = canvas.width * (1 - left - right)
         let h = canvas.height * (1 - top - bottom)
-         let step = w / subDiv
+        let step = w / subDiv
         let x1 = left * canvas.width
         let y1 = top * canvas.height
 
 
-               for (var j = 0; j <= subDiv; j++) {
+        for (var j = 0; j <= subDiv; j++) {
+            let x2 = x1 + j * step
+            drawMullion(context, x2, stepY * top, x2, stepY * (1 - bottom))
+        }
+
+
+        // drawMullion(context, x1, stepY * top, x1 + w, stepY * top)
+        // drawMullion(context, x1, stepY * (1 - bottom), x1 + w, stepY * (1 - bottom))
+
+
+
+    }
+
+    return obj.draw
+
+}
+
+
+
+
+
+var PunchMullion = function({ color, top, bottom, left, right, width, subDiv, repeat }) {
+
+    let obj = {}
+
+    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+
+
+        if (!overide) {
+            context.strokeStyle = color
+            context.stroke();
+        }
+        context.lineWidth = width;
+
+        if (repeat) {
+            let w = stepX * (1 - left - right)
+            let h = stepY * (1 - top - bottom)
+            let step = w / subDiv
+
+            for (var x = 0; x <= canvas.width; x += stepX) {
+
+                let x1 = x + left * stepX
+                let y1 = top * stepY
+
+                for (var j = 0; j <= subDiv; j++) {
                     let x2 = x1 + j * step
                     drawMullion(context, x2, stepY * top, x2, stepY * (1 - bottom))
                 }
+
+                drawMullion(context, x1, stepY * top, x1 + w, stepY * top)
+                drawMullion(context, x1, stepY * (1 - bottom), x1 + w, stepY * (1 - bottom))
+
+            }
+            return
+        }
+
+
+
+
+
+
+        let w = canvas.width * (1 - left - right)
+        let h = canvas.height * (1 - top - bottom)
+        let step = w / subDiv
+        let x1 = left * canvas.width
+        let y1 = top * canvas.height
+
+
+        for (var j = 0; j <= subDiv; j++) {
+            let x2 = x1 + j * step
+            drawMullion(context, x2, stepY * top, x2, stepY * (1 - bottom))
+        }
 
 
         // drawMullion(context, x1, stepY * top, x1 + w, stepY * top)
@@ -697,6 +843,7 @@ export {
     PunchWindow,
     StripWindow,
     StripMullion,
+    Texture, 
     RandomHorizontal,
     Replace
 
