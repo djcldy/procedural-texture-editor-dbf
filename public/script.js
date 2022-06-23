@@ -268,7 +268,15 @@ function createPlots() {
       depth: 1,
     });
   });
-  scene.add(...plotMeshes, ...buildableMeshes);
+
+  const footprintMeshes = Object.values(sampleSolution.plots).map((plot) => {
+    return extrude({
+      polygon: sampleSolution.blocks[plot.children[0]].shape,
+      depth: 2,
+    });
+  });
+
+  scene.add(...plotMeshes, ...buildableMeshes, ...footprintMeshes);
 }
 
 function createBlocks() {
