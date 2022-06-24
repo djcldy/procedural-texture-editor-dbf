@@ -57,12 +57,13 @@ export function GenerateTexture(settings, type) {
 function createTexture(map) {
 
     let texture = new THREE.Texture(map)
-    texture.encoding = THREE.sRGBEncoding;
-    // texture.wrapS = THREE.RepeatWrapping;
-    // texture.wrapT = THREE.RepeatWrapping;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping; // CHANGED
+    // texture.offset.set( 0,0); // CHANGED
+    // texture.repeat.set( 0.01, 0.01 ); // CHANGED
+    // texture.repeat.set( 0.01, 0.01 ); // CHANGED
     texture.needsUpdate = true;
-    texture.encoding = THREE.sRGBEncoding;
-    texture.anisotropy = 16;
+
+
     return texture
 
 }
@@ -113,8 +114,8 @@ function MapPlot(settings, overide) {
 
     let rules = [
 
-        Background('red'),
-        OffsetEdge({ distance: 3, polygon: 'shape' })
+        Background('black'),
+        OffsetEdge({ distance: 3, polygon: 'shape' }),
 
     ]
 
@@ -122,7 +123,7 @@ function MapPlot(settings, overide) {
 
     for (var i = 0; i < rules.length; i++) {
 
-        if (overide) overideStyle(overide[i], context)
+        // if (overide) overideStyle(overide[i], context)
         rules[i]({ settings, canvas, context, plotAttributes, bbox, sf }, overide)
     }
 
@@ -296,8 +297,8 @@ function initCanvas(width, height, scaleFactor) {
     canvas.width = width * sf
     canvas.height = height * sf
     let context = canvas.getContext('2d')
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    // context.fillStyle = '#ffffff';
+    // context.fillRect(0, 0, canvas.width, canvas.height);
 
     return { canvas, context }
 

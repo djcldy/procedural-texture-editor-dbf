@@ -82,14 +82,36 @@ function ProceduralTextureMesh(solution, plotSettings, facadeSettings) {
 
 
     let plotMaterials = PlotTexture(solution, plotSettings)
-    let plotMeshes = PlotMesh(solution)
+    let { planes, meshes } = PlotMesh(solution)
     // let buildingMaterials = BuildingTexture(solution)
-    let buildingMeshes = BuildingMesh(solution,facadeSettings)
+    let buildingMeshes = BuildingMesh(solution, facadeSettings)
 
-    applyMeshMaterials(plotMeshes, plotMaterials)
-    // ApplyMaterialsArr(buildingMeshes, buildingMaterials)
 
-    scene.add(...plotMeshes)
+
+    applyMeshMaterials(meshes, plotMaterials)
+    applyMeshMaterials(planes, plotMaterials)
+
+    meshes.forEach(m => {
+
+        let { map } = m.material
+        let texture = map.clone()
+
+        m.material.alphaMap = null
+
+        map.wrapS = map.wrapT = THREE.RepeatWrapping; // CHANGED
+        texture.offset.set(1,1); // CHANGED
+        texture.repeat.set(0.01, 0.01); // CHANGED
+        //           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        // texture.repeat.set( 1 / 500, 1 / 500 );
+
+        // // texture.repeat.set( 0.05, 0.05 );
+        // texture.offset.set( 0.1, 0.5);
+        texture.needsUpdate = true
+        m.material.map = texture
+
+    })
+
+    scene.add(...planes)
 
 }
 
@@ -105,7 +127,7 @@ function applyMeshMaterials(meshes, materials) {
 
     for (var i = 0; i < meshes.length; i++) {
 
-        meshes[i].material = materials[i]
+        meshes[i].material = materials[i].clone()
 
     }
 
@@ -144,7 +166,7 @@ function PlotTexture({ plots, blocks }, settings) {
         let material = mat.clone()
         // console.log(diffuse)
         material.map = diffuse
-        // material.alphaMap = alpha
+        material.alphaMap = diffuse
         // material.bumpMap = bump 
         materials.push(material)
 
@@ -183,10 +205,89 @@ function PlotMesh({ plots, blocks }) {
     console.log('create mesh')
 
     const meshes = Object.values(plots).map((plot) => {
+
+
         return extrude({
             polygon: plot.shape,
-            depth: 0.1,
+            depth: 1,
         });
+    });
+
+
+    let material = new THREE.MeshPhongMaterial({ wireframe: false });
+
+
+    const planes = Object.values(plots).map((plot) => {
+
+        let bbox = getWorldBoundingBox(plot.shape)
+
+        let points = plot.shape.map(o => { o.x, o.z })
+
+        // let geometry = getGeometryFromSetOfPoints(points)
+
+
+
+        var geometry = new THREE.PlaneGeometry(bbox.width, bbox.height); // align length with z-axis
+        geometry.rotateX(-Math.PI / 2);
+        let mesh = new THREE.Mesh(geometry)
+        // mesh.renderOrder = 3
+
+
+
+        // const geometry = new THREE.ShapeGeometry(plot.shape);
+        // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        // const mesh = new THREE.Mesh(geometry, material);
+
+
+        mesh.position.x = (bbox.max.x - bbox.min.x) / 2 + bbox.min.x
+        mesh.position.y = 10
+        mesh.position.z = (bbox.max.z - bbox.min.z) / 2 + bbox.min.z
+
+        // mesh.position.y = 2
+        // let extrusionMesh = extrude({
+        //     polygon: plot.shape,
+        //     depth: 1,
+        // });
+        // const box = new THREE.Box3();
+        // extrusionMesh.geometry.computeBoundingBox();
+
+        // box.copy(extrusionMesh.geometry.boundingBox).applyMatrix4(extrusionMesh.matrixWorld);
+        // box.width = box.max.x - box.min.x
+        // box.height = box.max.z - box.min.z
+
+        // console.log('...')
+
+        // console.log('box:', JSON.stringify(box, null, 4))
+        // console.log('bbox:', JSON.stringify(bbox, null, 4))
+        return mesh
+        // scene.add(mesh)
+
+        function getWorldBoundingBox(pts) {
+
+            let zMin, zMax
+            let xMin = zMin = 10000000
+            let xMax = zMax = -10000000
+
+            pts.forEach(p => {
+
+                let { x, z } = p
+                if (x > xMax) xMax = x
+                if (z > zMax) zMax = z
+                if (x < xMin) xMin = x
+                if (z < zMin) zMin = z
+
+            })
+
+            let width = xMax - xMin
+            let height = zMax - zMin
+
+            let min = new THREE.Vector3(xMin, 0, zMin)
+            let max = new THREE.Vector3(xMax, 0, zMax)
+
+            return { min, max, width, height }
+
+        }
+
     });
 
 
@@ -207,9 +308,11 @@ function PlotMesh({ plots, blocks }) {
         });*/
 
 
-    return meshes
+    return { meshes, planes }
 
 }
+
+
 
 
 function BuildingMesh({ blocks }, settings) {
@@ -237,7 +340,7 @@ function BuildingMesh({ blocks }, settings) {
             scene.add(mesh);
         });
     });
- AddSlabs()
+    AddSlabs()
 
 
 
@@ -297,7 +400,7 @@ function initThreeJS() {
     const aspect = window.innerWidth / window.innerHeight;
 
     camera = new THREE.PerspectiveCamera(50, aspect, 0.01, 30000);
-    camera.position.set(0, 0, 25);
+    camera.position.set(0, 200, 25);
     camera.lookAt(0, 0, 0);
 
     scene = new THREE.Scene();

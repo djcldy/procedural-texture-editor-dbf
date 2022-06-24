@@ -102,27 +102,51 @@ var OffsetEdge = function({ distance /*, polygon*/ }) {
 
     obj.draw = function({ settings, canvas, context, plotAttributes, bbox, sf }, overide) {
 
-        let off = getOffset(plotAttributes['shape'], 25)
+        let off = getOffset(plotAttributes['buildable'], 5)
+
+        console.log('draw grid')
 
 
-        let polygon = normalizePolygon(off, bbox, sf)
+        let polygon = normalizePolygon(plotAttributes['buildable'], bbox, sf)
         // if (!overide) context.fillStyle = 'whi'
 
-        context.strokeStyle = 'white';
-        context.lineWidth = 1000;
-        context.fillStyle = 'white'
-        context.fillRect( 0, 0,25, 25,);
-        context.fillRect(0, canvas.height,25, 25 );
-        context.fillRect(canvas.width, 0,25, 25, );
-        context.fillRect( canvas.width, canvas.height,25, 25);
+        context.strokeStyle = 'black';
+           context.fillStyle = 'white'
+        context.lineWidth = 5;
 
-        // context.stroke();
+
+        let step = 5 * sf
+        let stepY = 5 * sf
+
+        // for (var x = 0; x < canvas.width; x += step) {
+
+        //     drawMullion(context, x, 0, x, canvas.height)
+
+        // }
+
+        // for (var y = 0; y < canvas.height; y += stepY) {
+
+        //     drawMullion(context, 0, y, canvas.width, y)
+
+        // }
+
+        context.lineWidth = 200;
+
+        let pt = polygon[0]
+        context.beginPath();
+        context.moveTo(pt.x, pt.z);
+
+        for (var i = 1; i < polygon.length; i++) {
+            let pt = polygon[i]
+            context.lineTo(pt.x, pt.z);
+        }
+        context.closePath();
+        context.stroke();
+        context.fill();
+
         // context.beginPath();
-        // context.moveTo(0, 0);
-        // context.lineTo(canvas.width, canvas.height);
-        // context.lineTo(canvas.width, 0);
-        // context.lineTo(0,canvas.height);
-        // context.closePath();
+        // context.arc(canvas.width / 2, canvas.height / 2, canvas.width / 4, 0, 2 * Math.PI);
+        // context.stroke();
 
     }
 
@@ -141,11 +165,11 @@ function normalizePolygon(polygon, { xMin, zMin }, sf) {
 
         let { x, y, z } = o
 
-        let xn = x - xMin
+        let xn = (x - xMin) * sf
         let yn = 0
-        let zn = z - zMin
+        let zn = (z - zMin) * sf
 
-        arr.push({ x: xn * sf, y: yn, z: zn * sf })
+        arr.push({ x: xn, y: yn, z: zn })
 
     })
 

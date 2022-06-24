@@ -4,6 +4,8 @@ import {
   Mesh,
   MeshStandardMaterial,
   Color,
+  ExtrudeBufferGeometry,
+  Vector2
 } from "./three.module.js";
 
 export function extrudeBlock({ shape, holes, floors, f2f, translation }) {
@@ -21,7 +23,8 @@ export function extrudeBlock({ shape, holes, floors, f2f, translation }) {
     }
   }
 
-  const geometry = new ExtrudeGeometry(object, { depth, bevelEnabled: false });
+
+  const geometry = new ExtrudeGeometry(object, { depth, bevelEnabled: false, UVGenerator: myUVGenerator });
   geometry.rotateX(-Math.PI / 2);
   if (translation)
     geometry.translate(translation.x, translation.y, translation.z);
@@ -72,7 +75,7 @@ export function extrude({
     }
   }
 
-  const geometry = new ExtrudeGeometry(shape, { depth, bevelEnabled: false });
+  const geometry = new ExtrudeBufferGeometry(shape, { depth, bevelEnabled: false, UVGenerator:myUVGenerator});
   geometry.rotateX(-Math.PI / 2);
 
   const mesh = new Mesh(
@@ -89,9 +92,67 @@ export function extrude({
     mesh.rotateZ(rotation.z);
   }
   if (scale) mesh.scale(scale.x, scale.y, scale.z);
-  if (translation)
-    mesh.position.set(translation.x, translation.y, translation.z);
+  if (translation) mesh.position.set(translation.x, translation.y, translation.z);
   if (uuid) mesh.uuid = uuid;
 
   return mesh;
 }
+
+
+const myUVGenerator = {
+
+  generateTopUV: function ( geometry, vertices, indexA, indexB, indexC ) {
+
+    const a_x = vertices[ indexA * 3 ];
+    const a_y = vertices[ indexA * 3 + 1 ];
+    const b_x = vertices[ indexB * 3 ];
+    const b_y = vertices[ indexB * 3 + 1 ];
+    const c_x = vertices[ indexC * 3 ];
+    const c_y = vertices[ indexC * 3 + 1 ];
+
+    return [
+      new Vector2( a_x, a_y ),
+      new Vector2( b_x, b_y ),
+      new Vector2( c_x, c_y )
+    ];
+
+  },
+
+  generateSideWallUV: function ( geometry, vertices, indexA, indexB, indexC, indexD ) {
+
+    const a_x = vertices[ indexA * 3 ];
+    const a_y = vertices[ indexA * 3 + 1 ];
+    const a_z = vertices[ indexA * 3 + 2 ];
+    const b_x = vertices[ indexB * 3 ];
+    const b_y = vertices[ indexB * 3 + 1 ];
+    const b_z = vertices[ indexB * 3 + 2 ];
+    const c_x = vertices[ indexC * 3 ];
+    const c_y = vertices[ indexC * 3 + 1 ];
+    const c_z = vertices[ indexC * 3 + 2 ];
+    const d_x = vertices[ indexD * 3 ];
+    const d_y = vertices[ indexD * 3 + 1 ];
+    const d_z = vertices[ indexD * 3 + 2 ];
+
+    if ( Math.abs( a_y - b_y ) < 0.01 ) {
+
+      return [
+        new Vector2( a_x, 1 - a_z ),
+        new Vector2( b_x, 1 - b_z ),
+        new Vector2( c_x, 1 - c_z ),
+        new Vector2( d_x, 1 - d_z )
+      ];
+
+    } else {
+
+      return [
+        new Vector2( a_y, 1 - a_z ),
+        new Vector2( b_y, 1 - b_z ),
+        new Vector2( c_y, 1 - c_z ),
+        new Vector2( d_y, 1 - d_z )
+      ];
+
+    }
+
+  }
+
+};
