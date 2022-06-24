@@ -19,18 +19,22 @@ const loadImage = async (context, canvas, src) => {
 };
 
 const Texture = (image) => {
+
+    console.log('texture!')
   let obj = {};
 
-  let src = 'rhino.jpg';
+  let src = '/textures/maps/rhino.jpg';
 
   obj.draw = async ({ settings, canvas, context, stepX, stepY }, overide) => {
     if (!overide) {
       // context.fillStyle = color;
-      context.fillRect(0, 0, canvas.width, canvas.height);
+        await loadImage(context, canvas, src);
       return;
     }
-
-    await loadImage(context, canvas, src);
+    // context.fillStyle = 'white'
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    return 
+  
   };
 
   return obj.draw;

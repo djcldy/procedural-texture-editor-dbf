@@ -15,8 +15,13 @@ obj['examples']['texture'] = {
   moduleWidth: 7.5,
   horizontalGrid: '[0, 0.25, 0.5, 0.75, 1]',
   bumpMap: '[0, 0, 100, 150, 200]',
-  alphaMap: '[155, 255, 255, 255]',
-  rules: ["Texture('#b8d7e1')"],
+  alphaMap: '[255,100,255,255,255,255]',
+  rules: ["Texture('#b8d7e1')",
+      "PunchWindow({ color: '#5b5d58', top: 0.2, bottom: 0.3, left: 0.2, right: 0.6, repeat: true })",
+    "PunchWindow({ color: '#5b5d58', top: 0.2, bottom: 0.3, left: 0.6, right: 0.2, repeat: true })",
+        "MullionHorizontal({ color: 'white', width: 2, start: 0, end: 1 })",
+    "MullionHorizontal({ color: 'white', width: 4, start: 0.1, end: 0.9 })"
+    ]
 };
 
 obj['office']['90'] = {

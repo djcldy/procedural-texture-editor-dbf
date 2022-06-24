@@ -32,7 +32,7 @@ import {
 } from './texture-rules.js'; // maciej make sure ur loading threjs here
 
 export async function GenerateTexture(settings) {
-  const res = await TextureFactory(ParseRule(settings));
+  const res = await TextureFactory(settings /*ParseRule(settings)*/);
   return res;
 }
 
