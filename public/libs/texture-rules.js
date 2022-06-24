@@ -102,55 +102,99 @@ var OffsetEdge = function({ distance /*, polygon*/ }) {
 
     obj.draw = function({ settings, canvas, context, plotAttributes, bbox, sf }, overide) {
 
-        let off = getOffset(plotAttributes['buildable'], 5)
-
-        console.log('draw grid')
-
-
-        let polygon = normalizePolygon(plotAttributes['buildable'], bbox, sf)
         // if (!overide) context.fillStyle = 'whi'
 
-        context.strokeStyle = 'black';
-           context.fillStyle = 'white'
-        context.lineWidth = 5;
-
+        context.fillStyle = 'lightgrey'
+        context.lineWidth = 100;
 
         let step = 5 * sf
         let stepY = 5 * sf
 
-        // for (var x = 0; x < canvas.width; x += step) {
 
-        //     drawMullion(context, x, 0, x, canvas.height)
 
-        // }
+        var gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
 
-        // for (var y = 0; y < canvas.height; y += stepY) {
+        // Add three color stops
+        gradient.addColorStop(0, 'green');
+        gradient.addColorStop(.5, 'cyan');
+        gradient.addColorStop(1, 'white');
 
-        //     drawMullion(context, 0, y, canvas.width, y)
+        // Set the fill style and draw a rectangle
+        context.fillStyle = gradient;
+        // ctx.fillRect(20, 20, 200, 100);
 
-        // }
 
-        context.lineWidth = 200;
 
-        let pt = polygon[0]
-        context.beginPath();
-        context.moveTo(pt.x, pt.z);
-
-        for (var i = 1; i < polygon.length; i++) {
-            let pt = polygon[i]
-            context.lineTo(pt.x, pt.z);
-        }
-        context.closePath();
-        context.stroke();
+        context.strokeStyle = 'grey';
+        context.lineWidth = 10;
+        drawPolygon(normalizePolygon(plotAttributes['shape'], bbox, sf), context)
         context.fill();
 
-        // context.beginPath();
-        // context.arc(canvas.width / 2, canvas.height / 2, canvas.width / 4, 0, 2 * Math.PI);
+        for (var x = 0; x < canvas.width; x += sf * 5) {
+
+            drawMullion(context, x, 0, x, canvas.height)
+        }
+
+        for (var y = 0; y < canvas.height; y += sf * 1) {
+
+            drawMullion(context, 0, y, canvas.width, y)
+        }
+
+
+        context.strokeStyle = 'grey';
+        context.lineWidth = 100;
+        drawPolygon(normalizePolygon(plotAttributes['shape'], bbox, sf), context)
+        context.stroke();
+
+        context.strokeStyle = 'black';
+        context.lineWidth = 4;
+
+
+
+        context.strokeStyle = 'grey';
+        context.lineWidth = 250;
+        drawPolygon(normalizePolygon(plotAttributes['footprint'], bbox, sf), context)
+        context.stroke();
+
+
+
+
+        // for (var i = 0; i < 16; i+=2){
+
+        // context.lineWidth = i;
+
+        // let off = getOffset(plotAttributes['buildable'], i)
+        // let polygon = normalizePolygon(off, bbox, sf)
+        // drawPolygon(polygon, context)
         // context.stroke();
+
+
+        // }
+
+
+
+
+
 
     }
 
     return obj.draw
+
+}
+
+
+function drawPolygon(polygon, context) {
+
+    let pt = polygon[0]
+    context.beginPath();
+    context.moveTo(pt.x, pt.z);
+
+    for (var i = 1; i < polygon.length; i++) {
+        let pt = polygon[i]
+        context.lineTo(pt.x, pt.z);
+    }
+
+    context.closePath();
 
 }
 

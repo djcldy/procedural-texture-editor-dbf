@@ -83,11 +83,9 @@ function getTilingParameter(settings) {
 function TextureFactory(settings, map) {
 
     let { bumpMap, alphaMap } = settings
-
     let diffuse = map(settings, false)
     let alpha = map(settings, alphaMap)
     let bump = map(settings, bumpMap)
-
     return { diffuse, alpha, bump }
 
 }
@@ -114,7 +112,7 @@ function MapPlot(settings, overide) {
 
     let rules = [
 
-        Background('black'),
+        // Background('black'),
         OffsetEdge({ distance: 3, polygon: 'shape' }),
 
     ]

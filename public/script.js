@@ -96,7 +96,7 @@ function ProceduralTextureMesh(solution, plotSettings, facadeSettings) {
         let { map } = m.material
         let texture = map.clone()
 
-        m.material.alphaMap = null
+        // m.material.alphaMap = null
 
         map.wrapS = map.wrapT = THREE.RepeatWrapping; // CHANGED
         texture.offset.set(1,1); // CHANGED
@@ -161,12 +161,13 @@ function PlotTexture({ plots, blocks }, settings) {
     let arr = Object.values(plots).map((plot) => {
 
         let { shape, buildable, /*footprint*/ } = plot
-        settings['plotAttributes'] = { shape, buildable, /*footprint*/ }
+        let footprint = blocks[plot.children[0]].shape
+        settings['plotAttributes'] = { shape, buildable, footprint }
         let { diffuse, alpha, bump } = GenerateTexture(settings, 'plot')
         let material = mat.clone()
         // console.log(diffuse)
         material.map = diffuse
-        material.alphaMap = diffuse
+        // material.alphaMap = diffuse
         // material.bumpMap = bump 
         materials.push(material)
 
@@ -240,7 +241,7 @@ function PlotMesh({ plots, blocks }) {
 
 
         mesh.position.x = (bbox.max.x - bbox.min.x) / 2 + bbox.min.x
-        mesh.position.y = 10
+        mesh.position.y = 0
         mesh.position.z = (bbox.max.z - bbox.min.z) / 2 + bbox.min.z
 
         // mesh.position.y = 2
