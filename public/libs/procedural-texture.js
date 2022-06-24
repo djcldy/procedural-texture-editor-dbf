@@ -58,8 +58,8 @@ function createTexture(map) {
 
     let texture = new THREE.Texture(map)
     texture.encoding = THREE.sRGBEncoding;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
+    // texture.wrapS = THREE.RepeatWrapping;
+    // texture.wrapT = THREE.RepeatWrapping;
     texture.needsUpdate = true;
     texture.encoding = THREE.sRGBEncoding;
     texture.anisotropy = 16;

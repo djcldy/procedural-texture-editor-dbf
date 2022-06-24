@@ -109,16 +109,20 @@ var OffsetEdge = function({ distance /*, polygon*/ }) {
         // if (!overide) context.fillStyle = 'whi'
 
         context.strokeStyle = 'white';
-        context.lineWidth = 5;
+        context.lineWidth = 1000;
+        context.fillStyle = 'white'
+        context.fillRect( 0, 0,25, 25,);
+        context.fillRect(0, canvas.height,25, 25 );
+        context.fillRect(canvas.width, 0,25, 25, );
+        context.fillRect( canvas.width, canvas.height,25, 25);
 
-
-        context.stroke();
-        context.beginPath();
-        context.moveTo(0, 0);
-        context.lineTo(canvas.width, canvas.height);
-        context.lineTo(canvas.width, 0);
-        context.lineTo(0,canvas.height);
-        context.closePath();
+        // context.stroke();
+        // context.beginPath();
+        // context.moveTo(0, 0);
+        // context.lineTo(canvas.width, canvas.height);
+        // context.lineTo(canvas.width, 0);
+        // context.lineTo(0,canvas.height);
+        // context.closePath();
 
     }
 
