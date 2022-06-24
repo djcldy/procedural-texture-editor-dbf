@@ -1,9 +1,9 @@
-console.log('procedural-texture.js')
+console.log('procedural-texture.js');
 
 import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
 // import {
 //     Commercial90,
-//     Residential, 
+//     Residential,
 //     Office,
 //     Industrial90,
 //     Recreational90,
@@ -13,353 +13,262 @@ import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading 
 // } from './texture-presets.js'
 
 import {
-    Background,
-    CurtainWall,
-    Debug,
-    drawVerticals,
-    drawHorizontals,
-    MullionVertical,
-    MullionHorizontal,
-    PunchWindow,
-    PunchMullion,
-    Horizontal,
-    StripWindow,
-    StripMullion,
-    Texture,
-    RandomHorizontal,
-    Replace,
-    Frame
+  Background,
+  CurtainWall,
+  Debug,
+  drawVerticals,
+  drawHorizontals,
+  MullionVertical,
+  MullionHorizontal,
+  PunchWindow,
+  PunchMullion,
+  Horizontal,
+  StripWindow,
+  StripMullion,
+  Texture,
+  RandomHorizontal,
+  Replace,
+  Frame,
 } from './texture-rules.js'; // maciej make sure ur loading threjs here
 
-
-
-export function GenerateTexture(settings) {
-
-    return TextureFactory(ParseRule(settings))
-
+export async function GenerateTexture(settings) {
+  const res = await TextureFactory(ParseRule(settings));
+  return res;
 }
-
-
 
 export function ParseRule(settings) {
-    let params = {settings: null, canvas:null, context:null, stepX: null, stepY:null}
-    let arr = []
-    settings['rules'].forEach(f => {
-        let meth = eval("(" + f + ")")
-        arr.push(meth)
-    })
-    settings['rules'] = arr 
-    return settings
+  let params = { settings: null, canvas: null, context: null, stepX: null, stepY: null };
+  let arr = [];
+  settings['rules'].forEach((f) => {
+    let meth = eval('(' + f + ')');
+    arr.push(meth);
+  });
+  settings['rules'] = arr;
+  return settings;
 }
-
 
 export function CreateTexture(buildingAttributes, rule) {
-
-
-    // let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
-
-    // const randomRule = rules[Math.floor(Math.random() * rules.length)];
-    //     // return TextureFactory(Office30(buildingAttributes))
-    // return TextureFactory(randomRule(buildingAttributes))
-
-
-    // return TextureFactory(Residential80(buildingAttributes))
-
-
-
+  // let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
+  // const randomRule = rules[Math.floor(Math.random() * rules.length)];
+  //     // return TextureFactory(Office30(buildingAttributes))
+  // return TextureFactory(randomRule(buildingAttributes))
+  // return TextureFactory(Residential80(buildingAttributes))
 }
-
-
-
-
 
 function overideStyle(value, context) {
-
-    context.fillStyle = 'rgb(' + [value, value, value].join(',') + ')';
-    context.strokeStyle = 'rgb(' + [value, value, value].join(',') + ')';
-
+  context.fillStyle = 'rgb(' + [value, value, value].join(',') + ')';
+  context.strokeStyle = 'rgb(' + [value, value, value].join(',') + ')';
 }
 
+async function TextureFactory(settings) {
+  // let buildingAttri/butes = settings
 
+  let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes;
+  let { moduleWidth } = settings;
 
-function TextureFactory(settings) {
+  let numFloors = totalHeight / floorHeight;
+  let numModules = totalWidth / moduleWidth;
 
-    // let buildingAttri/butes = settings 
+  let repeat = { x: numModules, y: numFloors };
+  let { bumpMap, alphaMap /*repeat*/ } = settings;
 
-    let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes
-    let { moduleWidth } = settings
+  const diff = await Map(settings, false);
+  const al = await Map(settings, alphaMap);
+  const bu = await Map(settings, bumpMap);
 
-    let numFloors = totalHeight / floorHeight
-    let numModules = totalWidth / moduleWidth
+  let diffuse = await RepeatTexture(diff, repeat);
+  let alpha = await RepeatTexture(al, repeat);
+  let bump = await RepeatTexture(bu, repeat);
 
-    let repeat = { x: numModules, y: numFloors }
-    let { bumpMap, alphaMap, /*repeat*/ } = settings
-
-    let diffuse = RepeatTexture(Map(settings, false), repeat)
-    let alpha = RepeatTexture(Map(settings, alphaMap), repeat)
-    let bump = RepeatTexture(Map(settings, bumpMap), repeat)
-
-    return { diffuse, alpha, bump }
-
+  return { diffuse, alpha, bump };
 }
 
+async function RepeatTexture(map, repeat) {
+  let rows = [];
+  console.log('repeat');
 
-function RepeatTexture(map, repeat) {
+  for (let i = 0; i < repeat.y; i++) {
+    let row = [];
 
-
-    let rows = []
-
-    for (var i = 0; i < repeat.y; i++) {
-
-        let row = []
-
-        for (var j = 0; j < repeat.x; j++) {
-
-            row.push(map)
-
-        }
-
-        rows.push(mergeHorizontal(row))
-
+    for (let j = 0; j < repeat.x; j++) {
+      row.push(map);
     }
 
+    rows.push(mergeHorizontal(row));
+  }
 
-    let texture = new THREE.Texture(mergeVertical(rows))
-    texture.encoding = THREE.sRGBEncoding;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    // diffuse.repeat = new THREE.Vector2(numBays, numFloors)
-    texture.needsUpdate = true;
-    texture.encoding = THREE.sRGBEncoding;
-    texture.anisotropy = 16;
+  let texture = new THREE.Texture(mergeVertical(rows));
+  // let texture = new THREE.CanvasTexture(map);
+  texture.encoding = THREE.sRGBEncoding;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  // diffuse.repeat = new THREE.Vector2(numBays, numFloors)
+  texture.needsUpdate = true;
+  texture.encoding = THREE.sRGBEncoding;
+  texture.anisotropy = 16;
 
-    console.log('repeat texture')
-
-    return texture
-
-
+  return texture;
 }
 
+async function Map(settings, overide) {
+  let { cellWidth, moduleWidth, buildingAttributes, rules, horizontalGrid } = settings;
+  let { floorHeight } = buildingAttributes;
+  let windowRatio = 0.1;
+  let sf = 25; // scale factor
+  let { canvas, context } = initCanvas({ floorHeight, moduleWidth });
+  let stepY = canvas.height;
+  let stepX = cellWidth * sf;
+  let cells = GetGridCells({ moduleWidth, cellWidth, horizontalGrid }, canvas, sf);
 
+  if (overide) checkOverideArray(overide, rules);
 
-
-function Map(settings, overide) {
-
-    console.log('map!')
-
-    let { cellWidth, moduleWidth, buildingAttributes, rules, horizontalGrid } = settings
-    let { floorHeight } = buildingAttributes
-    let windowRatio = 0.1
-    let sf = 25 // scale factor
-    let { canvas, context } = initCanvas({ floorHeight, moduleWidth })
-    let stepY = canvas.height
-    let stepX = cellWidth * sf
-    let cells = GetGridCells({ moduleWidth, cellWidth, horizontalGrid }, canvas, sf)
-
-
-    if (overide) checkOverideArray(overide, rules)
-
-
-
-
-    for (var i = 0; i < rules.length; i++) {
-
-        if (overide) overideStyle(overide[i], context)
-        rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide)
-
+  for (let i = 0; i < rules.length; i++) {
+    if (overide) overideStyle(overide[i], context);
+    if (rules[i].constructor.name === 'AsyncFunction') {
+      await rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide);
+    } else {
+      rules[i]({ settings, canvas, context, stepX, stepY, cells, horizontalGrid }, overide);
     }
+  }
 
-    return canvas;
-
+  return canvas;
 }
 
 function checkOverideArray(overide, rules) {
+  let defaultValue = 255;
 
-    let defaultValue = 255
+  if (overide.length >= rules.length) return;
 
+  let delta = rules.length - overide.length;
 
-    if (overide.length >= rules.length) return
+  for (let i = 0; i < delta.length; i++) {
+    overide.push(defaultValue);
+  }
 
-
-    let delta = rules.length - overide.length
-
-    for (var i = 0; i < delta.length; i++) {
-
-        overide.push(defaultValue)
-    }
-
-    return
-
+  return;
 }
-
 
 function initCanvas({ moduleWidth, floorHeight }) {
+  let sf = 25; // scale factor
+  let canvas = document.createElement('canvas');
+  canvas.width = moduleWidth * sf;
+  canvas.height = floorHeight * sf;
 
-    let sf = 25 // scale factor
-    let canvas = document.createElement('canvas');
-    canvas.width = moduleWidth * sf
-    canvas.height = floorHeight * sf
+  // console.log(canvas.width)
 
-    // console.log(canvas.width)
+  let context = canvas.getContext('2d');
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
-    let context = canvas.getContext('2d')
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    return { canvas, context }
-
-
+  return { canvas, context };
 }
-
-
 
 function GetGridCells({ moduleWidth, cellWidth, horizontalGrid }, canvas, sf) {
+  let { width, height } = canvas;
 
+  let verticalGrid = getVerticalGrid({ cellWidth, sf, moduleWidth });
+  let rows = [];
 
-    let { width, height } = canvas
+  for (let i = 0; i < horizontalGrid.length; i++) {
+    let row = [];
+    let yPos = horizontalGrid[i] * height;
+    let stepY = null;
 
-    let verticalGrid = getVerticalGrid({ cellWidth, sf, moduleWidth })
-    let rows = []
-
-
-    for (var i = 0; i < horizontalGrid.length; i++) {
-
-
-        let row = []
-        let yPos = horizontalGrid[i] * height
-        let stepY = null
-
-        if (horizontalGrid.length - 1 === i) {
-            stepY = height - yPos
-        } else {
-            stepY = horizontalGrid[i + 1] * height - yPos
-        }
-
-
-        for (var j = 0; j < verticalGrid.length; j++) {
-
-
-
-            let xPos = verticalGrid[j] /** width*/
-            let stepX = null
-
-            if (verticalGrid.length - 1 === j) {
-                stepX = width - xPos
-            } else {
-                stepX = verticalGrid[j + 1] * width - xPos
-            }
-
-            stepX = cellWidth * sf
-
-            let cell = { xPos, yPos, stepX, stepY }
-            row.push(cell)
-
-        }
-
-        rows.push(row)
-
+    if (horizontalGrid.length - 1 === i) {
+      stepY = height - yPos;
+    } else {
+      stepY = horizontalGrid[i + 1] * height - yPos;
     }
 
-    return rows
+    for (let j = 0; j < verticalGrid.length; j++) {
+      let xPos = verticalGrid[j]; /** width*/
+      let stepX = null;
 
+      if (verticalGrid.length - 1 === j) {
+        stepX = width - xPos;
+      } else {
+        stepX = verticalGrid[j + 1] * width - xPos;
+      }
+
+      stepX = cellWidth * sf;
+
+      let cell = { xPos, yPos, stepX, stepY };
+      row.push(cell);
+    }
+
+    rows.push(row);
+  }
+
+  return rows;
 }
-
-
-
-
-
-
 
 function getVerticalGrid({ cellWidth, sf, moduleWidth }) {
+  let off = cellWidth * sf;
 
+  let verticalGrid = [];
+  let temp = 0;
 
-    let off = cellWidth * sf
+  for (let i = 0; i < moduleWidth * sf; i += off) {
+    verticalGrid.push(i);
+  }
 
-    let verticalGrid = []
-    let temp = 0
-
-    for (var i = 0; i < moduleWidth * sf; i += off) {
-
-        verticalGrid.push(i)
-
-    }
-
-    return verticalGrid
+  return verticalGrid;
 }
-
-
 
 function mergeVertical(arr) {
+  let width = 0;
+  let height = 0;
 
+  for (let i = 0; i < arr.length; i++) {
+    let texture = arr[i];
+    height += texture.height;
+    if (texture.width > width) width = texture.width;
+  }
 
-    let width = 0
-    let height = 0
+  let canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
 
-    for (var i = 0; i < arr.length; i++) {
+  let context = canvas.getContext('2d');
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
-        let texture = arr[i]
-        height += texture.height
-        if (texture.width > width) width = texture.width
+  let spacing = 0;
 
-    }
+  for (let i = 0; i < arr.length; i++) {
+    let texture = arr[i];
+    context.drawImage(texture, 0, spacing, texture.width, texture.height);
+    spacing += texture.height;
+  }
 
-    let canvas = document.createElement('canvas');
-    canvas.width = width
-    canvas.height = height
-
-    let context = canvas.getContext('2d')
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-
-    let spacing = 0
-
-    for (var i = 0; i < arr.length; i++) {
-
-        let texture = arr[i]
-        context.drawImage(texture, 0, spacing, texture.width, texture.height);
-        spacing += texture.height
-
-    }
-
-    return canvas
-
+  return canvas;
 }
 
-
 function mergeHorizontal(arr) {
+  let width = 0;
+  let height = 0;
 
+  for (let i = 0; i < arr.length; i++) {
+    let texture = arr[i];
+    width += texture.width;
+    if (texture.height > height) height = texture.height;
+  }
 
-    let width = 0
-    let height = 0
+  let canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
 
-    for (var i = 0; i < arr.length; i++) {
+  let context = canvas.getContext('2d');
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
-        let texture = arr[i]
-        width += texture.width
-        if (texture.height > height) height = texture.height
+  let spacing = 0;
 
-    }
+  for (let i = 0; i < arr.length; i++) {
+    let texture = arr[i];
+    context.drawImage(texture, spacing, 0, texture.width, texture.height);
+    spacing += texture.width;
+  }
 
-    let canvas = document.createElement('canvas');
-    canvas.width = width
-    canvas.height = height
-
-    let context = canvas.getContext('2d')
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-
-    let spacing = 0
-
-    for (var i = 0; i < arr.length; i++) {
-
-        let texture = arr[i]
-        context.drawImage(texture, spacing, 0, texture.width, texture.height);
-        spacing += texture.width
-
-    }
-
-    return canvas
-
+  return canvas;
 }

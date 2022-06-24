@@ -1,16 +1,9 @@
-
-
-
-let 
-
 {
-    "name": "commercial-90%",
-    "cellWidth": 1.5,
-    "moduleWidth": 6,
-    "horizontalGrid": "[0, 1]",
-    "bumpMap": "[0, 100, 100]",
-    "alphaMap": "[225, 255, 255]",
-    "rules": [
-        "Background('red')"
-    ]
+  "name": "commercial-90%",
+  "cellWidth": 1.5,
+  "moduleWidth": 6,
+  "horizontalGrid": "[0, 1]",
+  "bumpMap": "[0, 100, 100]",
+  "alphaMap": "[225, 255, 255]",
+  "rules": ["Background('red')"]
 }

@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <title>Texture API</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+      crossorigin="anonymous"
+    />
+  </head>
 
-<head>
-    <title> Texture API </title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-</head>
+  <body>
+    <div style="position: absolute; display: flex; flex-direction: column; right: 0px">
+      <select id="sel" onchange="show(this)">
+        <option value="">-- Select --</option>
+      </select>
 
-<body>
-    <div style="position: absolute; display: flex; flex-direction: column;right:0px;">
-
-
-    	<select id="sel" onchange="show(this)">
-    		<option value="">-- Select --</option>
-    	</select>
-
-        <textarea cols="80" rows="10" id="ruleText"></textarea>
-        <button type="button" id="submitFacade"> Submit Request</button>
+      <textarea cols="80" rows="10" id="ruleText"></textarea>
+      <button type="button" id="submitFacade">Submit Request</button>
     </div>
-    <script src="script.js" type="module">
-    </script>
-</body>
-
+    <script src="script.js" type="module"></script>
+  </body>
 </html>

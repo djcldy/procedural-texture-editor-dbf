@@ -1,13 +1,13 @@
-import * as THREE from "./jsm/three.module.js";
-import { OrbitControls } from "./jsm/OrbitControls.js";
-import { TransformControls } from "./jsm/TransformControls.js";
-import { CreateTexture, GenerateTexture } from "./libs/procedural-texture.js";
-import sampleSolution from "./jsm/sampleSolution2.js";
-import { extrude, extrudeBlock } from "./jsm/3d-tools.js";
-import { TextureBlock } from "./libs/block-elements.js";
+import * as THREE from './jsm/three.module.js';
+import { OrbitControls } from './jsm/OrbitControls.js';
+import { TransformControls } from './jsm/TransformControls.js';
+import { CreateTexture, GenerateTexture } from './libs/procedural-texture.js';
+import sampleSolution from './jsm/sampleSolution2.js';
+import { extrude, extrudeBlock } from './jsm/3d-tools.js';
+import { TextureBlock } from './libs/block-elements.js';
 
-import { presets } from "./libs/presets.js";
-import { getOffset } from "./jsm/clipper-tools.js";
+import { presets } from './libs/presets.js';
+import { getOffset } from './jsm/clipper-tools.js';
 
 let container;
 let camera, scene, raycaster;
@@ -29,18 +29,18 @@ let blocks;
 
 let defaultMaterial;
 
-const submitBtn = document.getElementById("submitFacade");
-const ruleText = document.getElementById("ruleText");
-submitBtn.addEventListener("click", submitFacadeRule);
+const submitBtn = document.getElementById('submitFacade');
+const ruleText = document.getElementById('ruleText');
+submitBtn.addEventListener('click', submitFacadeRule);
 
 // Execute a function when the user presses a key on the keyboard
-ruleText.addEventListener("keypress", function (event) {
+ruleText.addEventListener('keypress', function (event) {
   // If the user presses the "Enter" key on the keyboard
-  if (event.key === "Enter") {
+  if (event.key === 'Enter') {
     // Cancel the default action, if needed
     event.preventDefault();
     // Trigger the button element with a click
-    document.getElementById("submitFacade").click();
+    document.getElementById('submitFacade').click();
   }
 });
 
@@ -76,28 +76,18 @@ ruleText.addEventListener("keypress", function (event) {
 
 // <select id="sel" onchange="show(this)">
 
-var ele = document.getElementById("sel");
+let ele = document.getElementById('sel');
 
 for (let prop in presets) {
   for (let step in presets[prop]) {
-    ele.innerHTML =
-      ele.innerHTML +
-      '<option value="' +
-      prop +
-      "," +
-      step +
-      '">' +
-      prop +
-      "-" +
-      step +
-      "</option>";
+    ele.innerHTML = ele.innerHTML + '<option value="' + prop + ',' + step + '">' + prop + '-' + step + '</option>';
   }
 }
 
 sel.onchange = function () {
-  let ele = document.getElementById("sel");
+  let ele = document.getElementById('sel');
   let text = ele.value;
-  let id = text.split(",");
+  let id = text.split(',');
   let settings = presets[id[0]][id[1]];
   ruleText.value = JSON.stringify(settings, null, 4);
   submitFacadeRule();
@@ -109,23 +99,22 @@ animate();
 function applyRule(rule) {
   let settings = ParseRequest(rule);
 
-  settings["buildingAttributes"] = {
+  settings['buildingAttributes'] = {
     totalHeight: 16,
     floorHeight: 4,
     totalWidth: 16,
     slabThickness: 0.5,
-    buildingColorHex: "#777777",
-    slabColorHex: "#000000",
+    buildingColorHex: '#777777',
+    slabColorHex: '#000000',
   };
 
-  let mesh = materialSwatch(
-    GenerateTexture(settings),
-    settings.buildingAttributes
-  );
-  scene.add(mesh);
+  GenerateTexture(settings).then((res) => {
+    let mesh = materialSwatch(res, settings.buildingAttributes);
+    scene.add(mesh);
 
-  // AddSlabs()
-  createPlots();
+    // AddSlabs()
+    createPlots();
+  });
 }
 
 function materialSwatch({ diffuse, alpha, bump }, { totalHeight, totalWidth }) {
@@ -208,8 +197,8 @@ function RequestMaterial(settings) {
 }
 
 function GetFacadeMaterial(settings, rule) {
-  let buildingColorHex = "#777777";
-  let slabColorHex = "#000000";
+  let buildingColorHex = '#777777';
+  let slabColorHex = '#000000';
   let { diffuse, alpha, bump } = CreateTexture(settings, rule);
 
   let material = new THREE.MeshPhongMaterial({
@@ -243,8 +232,8 @@ function ParseRequest(str) {
   for (let prop in object) {
     let x = object[prop];
 
-    if (isString(x) && prop !== "name") {
-      console.log("is string!", x);
+    if (isString(x) && prop !== 'name') {
+      console.log('is string!', x);
       object[prop] = JSON.parse(x);
     }
   }
@@ -253,7 +242,7 @@ function ParseRequest(str) {
 }
 
 function isString(x) {
-  return Object.prototype.toString.call(x) === "[object String]";
+  return Object.prototype.toString.call(x) === '[object String]';
 }
 
 function createPlots() {
@@ -285,17 +274,12 @@ function createPlots() {
     });
   });
 
-  scene.add(
-    ...plotMeshes,
-    ...buildableMeshes,
-    ...footprintMeshes,
-    ...offsettedMeshes
-  );
+  scene.add(...plotMeshes, ...buildableMeshes, ...footprintMeshes, ...offsettedMeshes);
 }
 
 function createBlocks() {
-  let buildingColorHex = "#777777";
-  let slabColorHex = "#000000";
+  let buildingColorHex = '#777777';
+  let slabColorHex = '#000000';
 
   Object.values(sampleSolution.blocks).map((block) => {
     let meshes = TextureBlock(block);
@@ -319,7 +303,7 @@ function createBlocks() {
 }
 
 function AddSlabs() {
-  let material = new THREE.MeshLambertMaterial({ color: "grey" });
+  let material = new THREE.MeshLambertMaterial({ color: 'grey' });
 
   Object.values(sampleSolution.blocks).map((block) => {
     let { geometry } = extrudeBlock({
@@ -335,7 +319,7 @@ function AddSlabs() {
     mesh.receiveShadow = true;
     mesh.castShadow = true;
 
-    for (var i = 0; i <= floors; i++) {
+    for (let i = 0; i <= floors; i++) {
       let y = i * block.f2f + block.translation.y;
       setMatrix(matrix, 0, y, 0);
       mesh.setMatrixAt(i, matrix);
@@ -372,8 +356,8 @@ function setMatrix(matrix, x, y, z) {
 }
 
 function createMesh() {
-  let buildingColorHex = "#777777";
-  let slabColorHex = "#000000";
+  let buildingColorHex = '#777777';
+  let slabColorHex = '#000000';
 
   let totalHeight = 16;
   let totalWidth = 16;
@@ -431,7 +415,7 @@ function createMesh() {
 }
 
 function init() {
-  container = document.createElement("div");
+  container = document.createElement('div');
   document.body.appendChild(container);
   const aspect = window.innerWidth / window.innerHeight;
 
@@ -466,42 +450,42 @@ function init() {
 
   orbit = new OrbitControls(camera, renderer.domElement);
   orbit.update();
-  orbit.addEventListener("change", render);
+  orbit.addEventListener('change', render);
 
-  document.addEventListener("mousemove", onDocumentMouseMove, false);
-  window.addEventListener("resize", onWindowResize, false);
+  document.addEventListener('mousemove', onDocumentMouseMove, false);
+  window.addEventListener('resize', onWindowResize, false);
 
   initRequest();
 }
 
 function initRequest() {
-  let settings = presets["industrial"]["80"];
+  let settings = presets['industrial']['80'];
   ruleText.value = JSON.stringify(settings, null, 4);
   submitFacadeRule();
 }
 
 function submitFacadeRule() {
-  console.log("rule submitted");
+  console.log('rule submitted');
 
-  ruleText.value = ruleText.value.replace(/\s+/g, "");
+  ruleText.value = ruleText.value.replace(/\s+/g, '');
   clearScene();
   applyRule(ruleText.value);
   ruleText.value = JSON.stringify(JSON.parse(ruleText.value), null, 4);
 }
 
 function setCubeMap() {
-  console.log("setCubeMap");
+  console.log('setCubeMap');
 
   //cubemap
-  var path = "textures/clouds/";
-  var format = ".png";
-  var urls = [
-    "textures/clouds/2.png",
-    "textures/clouds/4.png",
-    "textures/clouds/top.png",
-    "textures/clouds/white.png",
-    "textures/clouds/1.png",
-    "textures/clouds/3.png",
+  let path = 'textures/clouds/';
+  let format = '.png';
+  let urls = [
+    'textures/clouds/2.png',
+    'textures/clouds/4.png',
+    'textures/clouds/top.png',
+    'textures/clouds/white.png',
+    'textures/clouds/1.png',
+    'textures/clouds/3.png',
   ];
 
   return new THREE.CubeTextureLoader().load(urls);
@@ -541,14 +525,14 @@ function render() {
 }
 
 function initPlane() {
-  var planeGeometry = new THREE.PlaneGeometry(500, 500);
+  let planeGeometry = new THREE.PlaneGeometry(500, 500);
   planeGeometry.rotateX(-Math.PI / 2);
 
   const material = new THREE.MeshStandardMaterial({
     color: 0xff00ff,
   });
 
-  var planeMaterial = new THREE.ShadowMaterial();
+  let planeMaterial = new THREE.ShadowMaterial();
   planeMaterial.opacity = 0.5;
 
   let plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -559,6 +543,6 @@ function initPlane() {
 
 function clearScene() {
   for (let i = scene.children.length - 1; i >= 0; i--) {
-    if (scene.children[i].type === "Mesh") scene.remove(scene.children[i]);
+    if (scene.children[i].type === 'Mesh') scene.remove(scene.children[i]);
   }
 }

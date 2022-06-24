@@ -1,5 +1,4 @@
-
-// deprecated! 
+// deprecated!
 
 // import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
 // import {
@@ -18,12 +17,7 @@
 //     Frame
 // } from './texture-rules.js'; // maciej make sure ur loading threjs here
 
-
-
-
-
 // export function defaultTexture(buildingAttributes) {
-
 
 //     let settings = {
 
@@ -40,8 +34,6 @@
 //     return settings
 // }
 
-
-
 // export function CustomRule(settings) {
 
 //     let params = {settings: null, canvas:null, context:null, stepX: null, stepY:null}
@@ -55,7 +47,7 @@
 
 //     })
 
-//     settings['rules'] = arr 
+//     settings['rules'] = arr
 
 //     // arr.forEach(f=>f(params))
 
@@ -65,12 +57,7 @@
 
 // function debug(){
 
-
 // }
-
-
-
-
 
 // export function Commercial90(buildingAttributes) {
 
@@ -93,12 +80,9 @@
 //     return settings
 // }
 
-
-
 // export function Residential90(buildingAttributes) {
 
 //     let settings = {
-
 
 //         name: 'residential-90%',
 //         buildingAttributes,
@@ -114,7 +98,6 @@
 //             Frame({ color: '#5b5d58', width: 4, x1: 0, y1: 0.2, x2: 1, y2: 0.8 }),
 //             Horizontal({ color: '#5b5d58', width: 6, t: 0.8 }),
 //         ],
-
 
 //     }
 
@@ -139,7 +122,6 @@
 //         ],
 //     }
 // }
-
 
 // // OFFICE PROGRAM
 
@@ -167,9 +149,6 @@
 
 // }
 
-
-
-
 // export function Office80(buildingAttributes) {
 
 //     let settings = {
@@ -193,7 +172,6 @@
 //     return settings
 
 // }
-
 
 // export function Office60(buildingAttributes) {
 
@@ -220,7 +198,6 @@
 
 // }
 
-
 // export function Office50(buildingAttributes) {
 
 //     let settings = {
@@ -245,10 +222,6 @@
 //     return settings
 
 // }
-
-
-
-
 
 // export function Office30(buildingAttributes) {
 
@@ -276,10 +249,6 @@
 //     return settings
 
 // }
-
-
-
-
 
 // export function Office20(buildingAttributes) {
 
@@ -336,8 +305,6 @@
 
 // }
 
-
-
 // export function Industrial90(buildingAttributes) {
 
 //     let settings = {
@@ -364,9 +331,6 @@
 
 // }
 
-
-
-
 // export function Recreational90(buildingAttributes) {
 
 //     let settings = {
@@ -390,8 +354,6 @@
 //     return settings
 // }
 
-
-
 // export function Institutional90(buildingAttributes) {
 
 //     let settings = {
@@ -413,14 +375,9 @@
 //     return settings
 // }
 
-
-
-
-
 // // // b8d7e1
 
 // // // ffefc6
-
 
 // // const com90 = Tile({
 
@@ -437,8 +394,6 @@
 
 // // })
 
-
-
 // // const com60a = Tile({
 
 // //     buildingAttributes,
@@ -453,8 +408,6 @@
 // //     ]
 
 // // })
-
-
 
 // // const com60b = Tile({
 
@@ -504,18 +457,15 @@
 // //     // let row1 = mergeHorizontal([com60d, com60a, com60b, com60a, com60c, com60b, com60a])
 // //     // let row2 = mergeHorizontal([com60b, com60a, com60b, com60a, com60c, com60a, com60d])
 
-// var Gradient = function(settings) {
-
+// let Gradient = function(settings) {
 
 //     let obj = {}
 
 //     obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
 
-
-//         var grd = context.createLinearGradient(0, 0, 200, 0);
+//         let grd = context.createLinearGradient(0, 0, 200, 0);
 //         grd.addColorStop(0, "red");
 //         grd.addColorStop(1, "white");
-
 
 //         if (!overide) context.fillStyle = grd;
 //         context.fillRect(0, 0, canvas.width, canvas.height);
@@ -526,27 +476,13 @@
 
 // }
 
-
-
-
-
-
-
-
-
 // function drawFrame(context, a, b, c, d) {
 
 //     // drawMullion(context, a, b, a, d) // a
-//     // drawMullion(context, a, b, c, b) // b 
-//     // drawMullion(context, c, b, c, d) // c 
+//     // drawMullion(context, a, b, c, b) // b
+//     // drawMullion(context, c, b, c, d) // c
 //     // drawMullion(context, a, d, c, d) // a
 // }
-
-
-
-
-
-
 
 // function CurtainWallRandom({ settings, canvas, context, stepX, stepY }, overide) {
 
@@ -556,11 +492,10 @@
 
 //     context.lineWidth = 3;
 
-//     for (var x = 0; x < canvas.width; x += stepX) {
+//     for (let x = 0; x < canvas.width; x += stepX) {
 
-//         var value = Math.floor(Math.random() * 24);
+//         let value = Math.floor(Math.random() * 24);
 //         context.fillStyle = 'rgb(' + [34, 155 + value, 215].join(',') + ')';
-
 
 //         if (!overide) context.fillStyle = 'rgb(' + [34, 155 + value, 215].join(',') + ')';
 //         let xPos = x
@@ -572,19 +507,14 @@
 
 // }
 
-
-
 // function drawVerticals({ settings, canvas, context, stepX, stepY }, overide) {
 
-
 //     let y = 0
-
 
 //     if (!overide) context.strokeStyle = 'white';
 //     context.lineWidth = 3;
 
-
-//     for (var x = 0; x < canvas.width; x += stepX) {
+//     for (let x = 0; x < canvas.width; x += stepX) {
 //         let xPos = x
 //         let yPos = y
 //         let width = stepX
@@ -595,7 +525,6 @@
 
 // }
 
-
 // function drawHorizontals({ settings, canvas, context }, overide) {
 
 //     let { horizontalGrid } = settings
@@ -605,16 +534,12 @@
 
 //     let y = 0;
 
-//     for (var i = 0; i < horizontalGrid.length; i++) {
+//     for (let i = 0; i < horizontalGrid.length; i++) {
 //         let step = canvas.height * horizontalGrid[i]
 //         drawMullion(context, 0, step, canvas.width, step)
 //     }
 
 // }
-
-
-
-
 
 // function drawBay({ context, xPos, yPos, stepX, stepY }) {
 
@@ -632,17 +557,7 @@
 
 // }
 
-
-
-
-
-
-
-
-
-
-// var Stroke = function({ color, width }) {
-
+// let Stroke = function({ color, width }) {
 
 //     let obj = {}
 
@@ -655,11 +570,7 @@
 
 //     return obj.draw
 
-
 // }
-
-
-
 
 // function setColor(context, channel, index, { bump, alpha }, diffuse) {
 
@@ -675,28 +586,19 @@
 //     }
 // }
 
-
-
-
-
-
-
 // function debugCells({ cells, context, canvas }) {
 
-
 //     for (let i = 0; i < cells.length; i++) {
-
 
 //         let row = cells[i]
 
 //         for (let j = 0; j < row.length; j++) {
 
-
 //             let cell = row[j]
 //             let { xPos, yPos, stepX, stepY } = cell
-//             var r = Math.floor(Math.random() * 255);
-//             var g = Math.floor(Math.random() * 255);
-//             var b = Math.floor(Math.random() * 255);
+//             let r = Math.floor(Math.random() * 255);
+//             let g = Math.floor(Math.random() * 255);
+//             let b = Math.floor(Math.random() * 255);
 
 //             let str = 'rgb(' + r + ',' + g + ',' + b + ')';
 //             context.fillStyle = str
@@ -707,13 +609,9 @@
 //         }
 //     }
 
-
 // }
-
-
 
 // let Office = { Office90, Office80, Office60, Office50, Office30, Office20 }
 // let Residential = { Residential90, Residential80 }
-
 
 // export { Office, Residential }
