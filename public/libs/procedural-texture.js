@@ -35,13 +35,13 @@ import {
 export async function TextureFactory(settings) {
   // let buildingAttri/butes = settings
 
-  let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes;
-  let { moduleWidth } = settings;
+  // let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes;
+  // let { moduleWidth } = settings;
 
-  let numFloors = totalHeight / floorHeight;
-  let numModules = totalWidth / moduleWidth;
+  // let numFloors = totalHeight / floorHeight;
+  // let numModules = totalWidth / moduleWidth;
 
-  let repeat = { x: numModules, y: numFloors };
+  // let repeat = { x: numModules, y: numFloors };
   let { bumpMap, alphaMap /*repeat*/ } = settings;
 
   const diffuse = await Map(settings, false);
@@ -55,8 +55,32 @@ export async function TextureFactory(settings) {
   return { diffuse, alpha, bump };
 }
 
+export function repeatTexture(settings, referenceTexture){
+
+  let texture = referenceTexture.clone()
+  let { totalHeight, floorHeight, totalWidth, /*moduleWidth*/ } = settings 
+  let {moduleWidth} = referenceTexture.settings
+
+  console.log(totalWidth, moduleWidth)
+
+  let numFloors = totalHeight / floorHeight;
+  let numModules = totalWidth / moduleWidth;
+
+  texture.encoding = THREE.sRGBEncoding;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat = new THREE.Vector2(numModules, numFloors)
+  texture.needsUpdate = true;
+  texture.anisotropy = 16;
+
+  return texture 
+
+
+
+}
+
 export async function GenerateTexture(settings) {
-  const res = await TextureFactory(settings /*ParseRule(settings)*/);
+  const res = await TextureFactory(settings);
   return res;
 }
 
@@ -109,10 +133,10 @@ async function RepeatTexture(map, repeat) {
 
 async function Map(settings, overide) {
   let { cellWidth, moduleWidth, buildingAttributes, rules, horizontalGrid } = settings;
-  let { floorHeight } = buildingAttributes;
+  // let { floorHeight } = buildingAttributes;
   let windowRatio = 0.1;
   let sf = 25; // scale factor
-  let { canvas, context } = initCanvas({ floorHeight, moduleWidth });
+  let { canvas, context } = initCanvas({ floorHeight: 4, moduleWidth });
   let stepY = canvas.height;
   let stepX = cellWidth * sf;
   let cells = GetGridCells({ moduleWidth, cellWidth, horizontalGrid }, canvas, sf);
@@ -137,6 +161,8 @@ async function Map(settings, overide) {
   texture.needsUpdate = true;
   texture.encoding = THREE.sRGBEncoding;
   texture.anisotropy = 16;
+
+  texture.settings = settings 
 
   return texture
 }
