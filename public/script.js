@@ -1,32 +1,24 @@
 import * as THREE from './jsm/three.module.js';
 import { OrbitControls } from './jsm/OrbitControls.js';
 import { TransformControls } from './jsm/TransformControls.js';
-import { CreateTexture, GenerateTexture,ParseRule } from './libs/procedural-texture.js';
+import { GenerateTexture, ParseRule } from './libs/procedural-texture.js';
 import sampleSolution from './jsm/sampleSolution2.js';
 import { extrude, extrudeBlock } from './jsm/3d-tools.js';
 import { TextureBlock } from './libs/block-elements.js';
-
 import { presets } from './libs/presets.js';
 import { getOffset } from './jsm/clipper-tools.js';
-
 let container;
 let camera, scene, raycaster;
 let renderer, control, orbit;
 let cubeMap;
-
 let INTERSECTED;
 let theta = 0;
-
 const mouse = new THREE.Vector2();
 const radius = 100;
-
 let objects = [];
-
 let totalHeight = 50;
 let floorHeight = 4;
-
 let blocks;
-
 let defaultMaterial;
 
 const submitBtn = document.getElementById('submitFacade');
@@ -37,10 +29,8 @@ submitBtn.addEventListener('click', submitFacadeRule);
 ruleText.addEventListener('keypress', function(event) {
     // If the user presses the "Enter" key on the keyboard
     if (event.key === 'Enter') {
-        // Cancel the default action, if needed
-        event.preventDefault();
-        // Trigger the button element with a click
-        document.getElementById('submitFacade').click();
+        event.preventDefault(); // Cancel the default action, if needed
+        document.getElementById('submitFacade').click(); // Trigger the button element with a click
     }
 });
 
@@ -65,107 +55,124 @@ sel.onchange = function() {
 init();
 animate();
 
-function applyRule(rule) {
-    let settings = ParseRequest(rule);
-
-    settings = ParseRule(settings)
-
-  
-
-   /* GenerateTexture(settings).then((res) => {
-        let mesh = materialSwatch(res, settings.buildingAttributes);
-        scene.add(mesh);
-
-    });
-*/
-    // let block =  Object.values(sampleSolution.blocks)[0]
 
 
-    Object.values(sampleSolution.blocks).map((block) => {
-        let meshes = TextureBlock(block);
-        let mesh = meshes[0]
-
-        meshes.forEach((mesh) => {
-            let { width } = mesh;
-            settings['buildingAttributes'] = {
-                totalHeight: block.f2f * block.floors,
-                floorHeight: block.f2f,
-                totalWidth: width,
-                slabThickness: 0.5,
-                // buildingColorHex,
-                // slabColorHex,
-            };
 
 
-            GenerateTexture(settings).then((res) => {
 
-                let { diffuse, alpha, bump } = res
+function ProceduralTexture(solution, textures, scene) {
 
-                mesh.material = new THREE.MeshPhongMaterial({
-                    map: diffuse,
-                    bumpMap: bump,
-                    bumpScale: 1,
-                    alphaMap: alpha,
-                    envMap: cubeMap,
-                    reflectivity: 0.3,
-                    transparent: true,
-                });
-                // let mesh = materialSwatch(res, settings.buildingAttributes);
-                scene.add(mesh);
+    var start = new Date().getTime(); // benchmark = 482ms 
 
-            });
-            // mesh.material = GetFacadeMaterial(settings);
+    // let settings = ParseRule(textures[0]) // turns preset string into methods 
 
-            // scene.add(mesh);
-        });
-    });
 
-    // createBlocks()
-    AddSlabs()
-    createPlots();
-}
+    let cache = {}
 
-function materialSwatch({ diffuse, alpha, bump }, { totalHeight, totalWidth }) {
+
+    let parsedTextures = textures.map(o => ParseRule(o))
+
+    parsedTextures.forEach(o => {
+
+        cache[o.name] = null
+        o['buildingAttributes'] = {
+            totalHeight: 5,
+            floorHeight: 5,
+            totalWidth: 5,
+        };
+
+
+    })
+
     let material = new THREE.MeshPhongMaterial({
-        map: diffuse,
-        bumpMap: bump,
         bumpScale: 1,
-        alphaMap: alpha,
-        envMap: cubeMap,
+        envMap: scene.background,
         reflectivity: 0.3,
         transparent: true,
     });
 
-    let bumpMaterial = new THREE.MeshPhongMaterial({
-        map: bump,
-    });
+    let block = Object.values(solution.blocks)[0]
+    let meshes = TextureBlock(block); // generate facades 
+    let mesh = meshes[0]
 
-    let alphaMaterial = new THREE.MeshPhongMaterial({
-        map: alpha,
-    });
+    mesh.material = material.clone()
 
-    let diffuseMaterial = new THREE.MeshPhongMaterial({
-        map: diffuse,
-    });
+    parsedTextures.forEach(o => {
 
-    const geometry = new THREE.BoxBufferGeometry(totalWidth, totalHeight, 0.1);
+        GenerateTexture(o).then((res) => {
 
-    let object = new THREE.Mesh();
+            cache[o.name] = res
 
-    const mesh = new THREE.Mesh(geometry, material);
-    const meshDiffuse = new THREE.Mesh(geometry, diffuseMaterial);
+            console.log(cache)
 
-    const meshAlpha = new THREE.Mesh(geometry, alphaMaterial);
-    const meshBump = new THREE.Mesh(geometry, bumpMaterial);
+            var end = new Date().getTime();
+            var time = end - start;
+            console.log('time...', time, 'ms')
 
-    meshDiffuse.position.set(-32, 32, 0);
-    meshAlpha.position.set(0, 32, 0);
-    meshBump.position.set(32, 32, 0);
 
-    object.add(mesh, meshBump, meshDiffuse, meshAlpha);
+        });
 
-    return object;
+
+
+    })
+
+
+
+
+
+
+
+    /*    Object.values(solution.blocks).map((block) => {
+
+            let meshes = TextureBlock(block); // generate facades 
+
+            meshes.forEach((mesh) => {
+                let { width } = mesh;
+                settings['buildingAttributes'] = {
+                    totalHeight: block.f2f * block.floors,
+                    floorHeight: block.f2f,
+                    totalWidth: width,
+                    slabThickness: 0.5
+                };
+
+                mesh.material = material.clone()
+
+
+                GenerateTexture(settings).then((res) => {
+
+                    let { diffuse, alpha, bump } = res
+                    mesh.material.map = diffuse
+                    mesh.material.bumpMap = bump
+                    mesh.material.alphaMap = alpha
+
+                    scene.add(mesh);
+
+                                var end = new Date().getTime();
+                var time = end - start;
+                console.log('time...', time, 'ms')
+
+                });
+
+
+
+            });
+        });*/
+
 }
+
+
+function GenerateTextures() {
+
+
+
+}
+
+
+function AssignMeshTextures() {
+
+
+}
+
 
 function MergeObjects(obj1, obj2) {
     let obj = {};
@@ -181,58 +188,7 @@ function MergeObjects(obj1, obj2) {
     return obj;
 }
 
-function RequestMaterial(settings) {
-    /*let { diffuse, alpha, bump } =*/
-    // let material = new THREE.MeshPhongMaterial({
-    //     map: diffuse,
-    //     bumpMap: bump,
-    //     bumpScale: 1,
-    //     alphaMap: alpha,
-    //     envMap: cubeMap,
-    //     reflectivity: 0.3,
-    //     transparent: true,
-    // });
-    // let bumpMaterial = new THREE.MeshPhongMaterial({
-    //     map: bump,
-    // });
-    // let alphaMaterial = new THREE.MeshPhongMaterial({
-    //     map: alpha,
-    // });
-    // let diffuseMaterial = new THREE.MeshPhongMaterial({
-    //     map: diffuse,
-    // });
-    // return { material };
-}
 
-function GetFacadeMaterial(settings, rule) {
-    let buildingColorHex = '#777777';
-    let slabColorHex = '#000000';
-    let { diffuse, alpha, bump } = CreateTexture(settings, rule);
-
-    let material = new THREE.MeshPhongMaterial({
-        map: diffuse,
-        bumpMap: bump,
-        bumpScale: 1,
-        alphaMap: alpha,
-        envMap: cubeMap,
-        reflectivity: 0.3,
-        transparent: true,
-    });
-
-    let bumpMaterial = new THREE.MeshPhongMaterial({
-        map: bump,
-    });
-
-    let alphaMaterial = new THREE.MeshPhongMaterial({
-        map: alpha,
-    });
-
-    let diffuseMaterial = new THREE.MeshPhongMaterial({
-        map: diffuse,
-    });
-
-    return material;
-}
 
 function ParseRequest(str) {
     let object = JSON.parse(str);
@@ -253,39 +209,6 @@ function isString(x) {
     return Object.prototype.toString.call(x) === '[object String]';
 }
 
-function createPlots() {
-    const plotMeshes = Object.values(sampleSolution.plots).map((plot) => {
-
-        return extrude({
-            polygon: plot.shape,
-            depth: 0.2,
-            holes: [plot.buildable]
-        });
-    });
-    const buildableMeshes = Object.values(sampleSolution.plots).map((plot) => {
-        return extrude({
-            polygon: plot.buildable,
-            depth: 0.2,
-        });
-    });
-
-    const footprintMeshes = Object.values(sampleSolution.plots).map((plot) => {
-        plot.footprint = sampleSolution.blocks[plot.children[0]].shape;
-        return extrude({
-            polygon: getOffset(plot.footrpint, 5),
-            depth: 3,
-        });
-    });
-
-    const offsettedMeshes = Object.values(sampleSolution.plots).map((plot) => {
-        return extrude({
-            polygon: getOffset(plot.buildable, 5),
-            depth: 1.5,
-        });
-    });
-
-    scene.add(...plotMeshes, ...buildableMeshes, ...footprintMeshes, /*...offsettedMeshes*/);
-}
 
 
 function AddSlabs() {
@@ -341,109 +264,6 @@ function setMatrix(matrix, x, y, z) {
     return matrix;
 }
 
-function createMesh() {
-    let buildingColorHex = '#777777';
-    let slabColorHex = '#000000';
-
-    let totalHeight = 16;
-    let totalWidth = 16;
-
-    let settings = {
-        totalHeight,
-        floorHeight: 4,
-        totalWidth,
-        slabThickness: 0.5,
-        buildingColorHex,
-        slabColorHex,
-    };
-
-    let { diffuse, alpha, bump } = CreateTexture(settings);
-
-    let material = new THREE.MeshPhongMaterial({
-        map: diffuse,
-        bumpMap: bump,
-        bumpScale: 1,
-        alphaMap: alpha,
-        envMap: cubeMap,
-        reflectivity: 0.3,
-        transparent: true,
-    });
-
-    let bumpMaterial = new THREE.MeshPhongMaterial({
-        map: bump,
-    });
-
-    let alphaMaterial = new THREE.MeshPhongMaterial({
-        map: alpha,
-    });
-
-    let diffuseMaterial = new THREE.MeshPhongMaterial({
-        map: diffuse,
-    });
-
-    const geometry = new THREE.BoxBufferGeometry(totalWidth, totalHeight, 0.1);
-
-    let object = new THREE.Mesh();
-
-    const mesh = new THREE.Mesh(geometry, material);
-    const meshDiffuse = new THREE.Mesh(geometry, diffuseMaterial);
-
-    const meshAlpha = new THREE.Mesh(geometry, alphaMaterial);
-    const meshBump = new THREE.Mesh(geometry, bumpMaterial);
-
-    meshDiffuse.position.set(-32, 32, 0);
-    meshAlpha.position.set(0, 32, 0);
-    meshBump.position.set(32, 32, 0);
-
-    object.add(mesh, meshBump, meshDiffuse, meshAlpha);
-
-    return object;
-}
-
-function init() {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    const aspect = window.innerWidth / window.innerHeight;
-
-    camera = new THREE.PerspectiveCamera(50, aspect, 0.01, 30000);
-    camera.position.set(0, 0, 25);
-    camera.lookAt(0, 0, 0);
-
-    scene = new THREE.Scene();
-
-    cubeMap = setCubeMap();
-
-    defaultMaterial = new THREE.MeshPhongMaterial({
-        envMap: cubeMap,
-        reflectivity: 0.3,
-        transparent: true,
-    });
-
-    scene.background = cubeMap;
-
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(1, 1, 1).normalize();
-    scene.add(light);
-
-    const ambient = new THREE.AmbientLight(0x404040, 2); // soft white light
-    scene.add(ambient);
-
-    raycaster = new THREE.Raycaster();
-    renderer = new THREE.WebGLRenderer();
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    container.appendChild(renderer.domElement);
-
-    orbit = new OrbitControls(camera, renderer.domElement);
-    orbit.update();
-    orbit.addEventListener('change', render);
-
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
-    window.addEventListener('resize', onWindowResize, false);
-
-    initRequest();
-}
-
 function initRequest() {
     let settings = presets['examples']['texture'];
     ruleText.value = JSON.stringify(settings, null, 4);
@@ -451,13 +271,40 @@ function initRequest() {
 }
 
 function submitFacadeRule() {
-    console.log('rule submitted');
 
+    console.log('rule submitted');
     ruleText.value = ruleText.value.replace(/\s+/g, '');
     clearScene();
-    applyRule(ruleText.value);
+
+
+    let tex1 = ParseRequest(JSON.stringify(presets['examples']['texture']))
+    let tex2 = ParseRequest(JSON.stringify(presets['office']['90']))
+    let tex3 = ParseRequest(JSON.stringify(presets['office']['80']))
+
+
+
+
+    ;
+
+    ProceduralTexture(sampleSolution, [tex1, tex2, tex3], scene);
+
+    // ProceduralTexture(sampleSolution, [ParseRequest(ruleText.value)], scene);
     ruleText.value = JSON.stringify(JSON.parse(ruleText.value), null, 4);
+
 }
+
+
+
+
+
+
+
+
+
+
+
+// do not touch... 
+
 
 function setCubeMap() {
     console.log('setCubeMap');
@@ -531,4 +378,50 @@ function clearScene() {
     for (let i = scene.children.length - 1; i >= 0; i--) {
         if (scene.children[i].type === 'Mesh') scene.remove(scene.children[i]);
     }
+}
+
+
+
+function init() {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const aspect = window.innerWidth / window.innerHeight;
+
+    camera = new THREE.PerspectiveCamera(50, aspect, 0.01, 30000);
+    camera.position.set(0, 0, 25);
+    camera.lookAt(0, 0, 0);
+
+    scene = new THREE.Scene();
+
+    cubeMap = setCubeMap();
+
+    defaultMaterial = new THREE.MeshPhongMaterial({
+        envMap: cubeMap,
+        reflectivity: 0.3,
+        transparent: true,
+    });
+
+    scene.background = cubeMap;
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(1, 1, 1).normalize();
+    scene.add(light);
+
+    const ambient = new THREE.AmbientLight(0x404040, 2); // soft white light
+    scene.add(ambient);
+
+    raycaster = new THREE.Raycaster();
+    renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+
+    orbit = new OrbitControls(camera, renderer.domElement);
+    orbit.update();
+    orbit.addEventListener('change', render);
+
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
+    window.addEventListener('resize', onWindowResize, false);
+
+    initRequest();
 }

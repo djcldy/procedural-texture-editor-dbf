@@ -31,6 +31,30 @@ import {
   Frame,
 } from './texture-rules.js'; // maciej make sure ur loading threjs here
 
+
+export async function TextureFactory(settings) {
+  // let buildingAttri/butes = settings
+
+  let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes;
+  let { moduleWidth } = settings;
+
+  let numFloors = totalHeight / floorHeight;
+  let numModules = totalWidth / moduleWidth;
+
+  let repeat = { x: numModules, y: numFloors };
+  let { bumpMap, alphaMap /*repeat*/ } = settings;
+
+  const diffuse = await Map(settings, false);
+  const alpha = await Map(settings, alphaMap);
+  const bump = await Map(settings, bumpMap);
+
+  // let diffuse = await RepeatTexture(diff, repeat);
+  // let alpha = await RepeatTexture(al, repeat);
+  // let bump = await RepeatTexture(bu, repeat);
+
+  return { diffuse, alpha, bump };
+}
+
 export async function GenerateTexture(settings) {
   const res = await TextureFactory(settings /*ParseRule(settings)*/);
   return res;
@@ -47,41 +71,14 @@ export function ParseRule(settings) {
   return settings;
 }
 
-export function CreateTexture(buildingAttributes, rule) {
-  // let rules = [Office90,Office80,Office60,Office50,Office30,Office20,Industrial90, Recreational90,Institutional90,Institutional50,Commercial90,Residential90]
-  // const randomRule = rules[Math.floor(Math.random() * rules.length)];
-  //     // return TextureFactory(Office30(buildingAttributes))
-  // return TextureFactory(randomRule(buildingAttributes))
-  // return TextureFactory(Residential80(buildingAttributes))
-}
+
 
 function overideStyle(value, context) {
   context.fillStyle = 'rgb(' + [value, value, value].join(',') + ')';
   context.strokeStyle = 'rgb(' + [value, value, value].join(',') + ')';
 }
 
-async function TextureFactory(settings) {
-  // let buildingAttri/butes = settings
 
-  let { totalHeight, floorHeight, totalWidth } = settings.buildingAttributes;
-  let { moduleWidth } = settings;
-
-  let numFloors = totalHeight / floorHeight;
-  let numModules = totalWidth / moduleWidth;
-
-  let repeat = { x: numModules, y: numFloors };
-  let { bumpMap, alphaMap /*repeat*/ } = settings;
-
-  const diff = await Map(settings, false);
-  const al = await Map(settings, alphaMap);
-  const bu = await Map(settings, bumpMap);
-
-  let diffuse = await RepeatTexture(diff, repeat);
-  let alpha = await RepeatTexture(al, repeat);
-  let bump = await RepeatTexture(bu, repeat);
-
-  return { diffuse, alpha, bump };
-}
 
 async function RepeatTexture(map, repeat) {
   let rows = [];
@@ -131,7 +128,17 @@ async function Map(settings, overide) {
     }
   }
 
-  return canvas;
+
+
+  let texture = new THREE.Texture(canvas);
+  texture.encoding = THREE.sRGBEncoding;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.needsUpdate = true;
+  texture.encoding = THREE.sRGBEncoding;
+  texture.anisotropy = 16;
+
+  return texture
 }
 
 function checkOverideArray(overide, rules) {

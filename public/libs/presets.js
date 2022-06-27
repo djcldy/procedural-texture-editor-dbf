@@ -10,7 +10,7 @@ let obj = {
 };
 
 obj['examples']['texture'] = {
-  name: 'office-90%',
+  name: 'debug-example',
   cellWidth: 1.875,
   moduleWidth: 7.5,
   horizontalGrid: '[0, 0.25, 0.5, 0.75, 1]',
