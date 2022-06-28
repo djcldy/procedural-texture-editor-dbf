@@ -1,13 +1,13 @@
 import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
 
 import { getOffset } from "../jsm/clipper-tools.js";
+import { mapRange } from "../jsm/math-tools.js";
 
-
-var Debug = function(msg) {
+var Debug = function (msg) {
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
         // console.log(msg)
 
@@ -40,13 +40,13 @@ var Debug = function(msg) {
 
 // }
 
-var Texture = function(image) {
+var Texture = function (image) {
 
     let obj = {}
 
     let src = 'rhino.jpg';
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
         if (!overide) {
             // context.fillStyle = color;
@@ -73,14 +73,14 @@ var Texture = function(image) {
 
 
 
-var Background = function(val) {
+var Background = function (val) {
 
     let obj = {}
 
     // let color = val 
 
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
 
         if (!overide) context.fillStyle = val
@@ -93,30 +93,27 @@ var Background = function(val) {
 }
 
 
-var OffsetEdge = function({ distance /*, polygon*/ }) {
+var OffsetEdge = function ({ distance /*, polygon*/ }) {
 
     let obj = {}
 
 
-
-
-    obj.draw = function({ settings, canvas, context, plotAttributes, bbox, sf }, overide) {
+    obj.draw = function ({ settings, canvas, context, plotAttributes, bbox, sf }, overide) {
 
         let off = getOffset(plotAttributes['buildable'], 5)
 
         console.log('draw grid')
 
-
-        let polygon = normalizePolygon(plotAttributes['buildable'], bbox, sf)
+        let polygon = normalizePolygon(plotAttributes['buildable'], bbox, canvas)
         // if (!overide) context.fillStyle = 'whi'
 
         context.strokeStyle = 'black';
-           context.fillStyle = 'white'
+        context.fillStyle = 'white'
         context.lineWidth = 5;
 
 
-        let step = 5 * sf
-        let stepY = 5 * sf
+        //let step = 5 * sf
+        //let stepY = 5 * sf
 
         // for (var x = 0; x < canvas.width; x += step) {
 
@@ -131,11 +128,9 @@ var OffsetEdge = function({ distance /*, polygon*/ }) {
         // }
 
         context.lineWidth = 200;
-
         let pt = polygon[0]
         context.beginPath();
         context.moveTo(pt.x, pt.z);
-
         for (var i = 1; i < polygon.length; i++) {
             let pt = polygon[i]
             context.lineTo(pt.x, pt.z);
@@ -155,7 +150,7 @@ var OffsetEdge = function({ distance /*, polygon*/ }) {
 }
 
 
-function normalizePolygon(polygon, { xMin, zMin }, sf) {
+function normalizePolygon(polygon, bbox, canvas) {
 
     console.log('normalizePolygon', polygon)
 
@@ -165,10 +160,9 @@ function normalizePolygon(polygon, { xMin, zMin }, sf) {
 
         let { x, y, z } = o
 
-        let xn = (x - xMin) * sf
+        let xn = mapRange(x, bbox.xMin, bbox.xMax, 0, canvas.width)
         let yn = 0
-        let zn = (z - zMin) * sf
-
+        let zn = mapRange(z, bbox.zMin, bbox.zMax, 0, canvas.height)
         arr.push({ x: xn, y: yn, z: zn })
 
     })
@@ -180,11 +174,11 @@ function normalizePolygon(polygon, { xMin, zMin }, sf) {
 
 
 
-var CurtainWall = function(diffuse) {
+var CurtainWall = function (diffuse) {
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
 
         if (!overide) context.fillStyle = diffuse
@@ -245,12 +239,12 @@ function drawHorizontals({ settings, canvas, context }, overide) {
 
 
 
-var Horizontal = function({ color, width, t }) {
+var Horizontal = function ({ color, width, t }) {
 
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
 
         if (!overide) {
@@ -286,11 +280,11 @@ var Horizontal = function({ color, width, t }) {
 
 
 
-var MullionVertical = function({ color, width, start, end }) {
+var MullionVertical = function ({ color, width, start, end }) {
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
         let y = 0
 
@@ -318,11 +312,11 @@ var MullionVertical = function({ color, width, start, end }) {
 }
 
 
-var MullionHorizontal = function({ color, width, start, end }) {
+var MullionHorizontal = function ({ color, width, start, end }) {
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
         let { horizontalGrid } = settings
 
@@ -354,19 +348,19 @@ var MullionHorizontal = function({ color, width, start, end }) {
 
 
 
-var Replace = function(rules, optional) {
+var Replace = function (rules, optional) {
 
     let { type, elements, component } = rules
 
     let obj = {}
 
-    obj.rule = function(params, overide) {
+    obj.rule = function (params, overide) {
 
         obj[type](params, overide)
 
     }
 
-    obj.row = function({ cells, context, canvas, horizontalGrid }, overide) {
+    obj.row = function ({ cells, context, canvas, horizontalGrid }, overide) {
 
 
         // let {         horizontalGrid: [0, 0.2, 0.8, 1],}
@@ -396,7 +390,7 @@ var Replace = function(rules, optional) {
     }
 
 
-    obj.checkers_a = function({ cells, context, canvas }, overide) {
+    obj.checkers_a = function ({ cells, context, canvas }, overide) {
 
 
         for (var i = 0; i < elements.length; i++) {
@@ -442,7 +436,7 @@ var Replace = function(rules, optional) {
     }
 
 
-    obj.checkers_b = function({ cells, context, canvas }, overide) {
+    obj.checkers_b = function ({ cells, context, canvas }, overide) {
 
         for (var i = 0; i < elements.length; i++) {
 
@@ -524,11 +518,11 @@ function replaceCell(cell, component, cells, context, canvas, overide) {
 
 
 
-var RandomHorizontal = function({ color, width, probability }) {
+var RandomHorizontal = function ({ color, width, probability }) {
 
     let obj = {}
 
-    obj.draw = function({ cells, settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ cells, settings, canvas, context, stepX, stepY }, overide) {
 
         let { horizontalGrid } = settings
 
@@ -563,11 +557,11 @@ var RandomHorizontal = function({ color, width, probability }) {
 }
 
 
-var StripWindow = function({ color, x1, y1, x2, y2 }) {
+var StripWindow = function ({ color, x1, y1, x2, y2 }) {
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
 
         if (!overide) {
@@ -597,11 +591,11 @@ var StripWindow = function({ color, x1, y1, x2, y2 }) {
 
 
 
-var PunchMullion = function({ color, top, bottom, left, right, width, subDiv, repeat }) {
+var PunchMullion = function ({ color, top, bottom, left, right, width, subDiv, repeat }) {
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
 
         if (!overide) {
@@ -665,11 +659,11 @@ var PunchMullion = function({ color, top, bottom, left, right, width, subDiv, re
 
 
 
-var PunchMullion = function({ color, top, bottom, left, right, width, subDiv, repeat }) {
+var PunchMullion = function ({ color, top, bottom, left, right, width, subDiv, repeat }) {
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
 
         if (!overide) {
@@ -731,11 +725,11 @@ var PunchMullion = function({ color, top, bottom, left, right, width, subDiv, re
 
 
 
-var PunchWindow = function({ color, top, bottom, left, right, repeat }) {
+var PunchWindow = function ({ color, top, bottom, left, right, repeat }) {
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
 
 
@@ -780,11 +774,11 @@ var PunchWindow = function({ color, top, bottom, left, right, repeat }) {
 
 
 
-var StripMullion = function({ color, width, x1, y1, x2, y2, subDiv }) {
+var StripMullion = function ({ color, width, x1, y1, x2, y2, subDiv }) {
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
 
         if (!overide) {
@@ -826,12 +820,12 @@ var StripMullion = function({ color, width, x1, y1, x2, y2, subDiv }) {
 
 
 
-var Frame = function({ color, width, x1, y1, x2, y2 }) {
+var Frame = function ({ color, width, x1, y1, x2, y2 }) {
 
 
     let obj = {}
 
-    obj.draw = function({ settings, canvas, context, stepX, stepY }, overide) {
+    obj.draw = function ({ settings, canvas, context, stepX, stepY }, overide) {
 
 
         if (!overide) {

@@ -114,7 +114,7 @@ function MapPlot(settings, overide) {
 
     let rules = [
 
-        Background('black'),
+        Background('red'),
         OffsetEdge({ distance: 3, polygon: 'shape' }),
 
     ]

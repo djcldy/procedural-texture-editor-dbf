@@ -8,6 +8,8 @@ import {
   Vector2
 } from "./three.module.js";
 
+import { mapRange } from "./math-tools.js";
+
 export function extrudeBlock({ shape, holes, floors, f2f, translation }) {
   let depth = f2f * floors;
   if (!shape.length) return null;
@@ -98,6 +100,41 @@ export function extrude({
   return mesh;
 }
 
+//Sets the Uvs of the plot mesh (optionally top) faces in the domain 0-1 based on mesh bounding box
+export function setPlotMeshUVbyBbox(mesh, onlyTop){
+  let geometry = mesh.geometry
+  
+  //as plot mesh geometry was created with extruded geometry rotated by X -math.Pi, we need to rotate it's
+  //the bounding box to opposite direction to get a proper UVs - let's create a copy of mesh geo and rotate it properly
+  let geometryClone = geometry.clone()
+  geometryClone.rotateX(Math.PI)
+  geometryClone.computeBoundingBox(); // compute bounding box
+  let bbox = geometryClone.boundingBox;
+  geometryClone.dispose()
+  console.log(geometry)
+  
+  //let's remap uvs of the mesh (optionally top) faces of extruded geometry to 0-1 domain based on rotated bbox
+  //to find top faces let's use the normals and select only those with normals = 1 on Y axis (top faces) 
+  const uvAttribute = geometry.attributes.uv;
+  const normalAttribute = geometry.attributes.normal;
+  let count = uvAttribute.count
+
+  for (let i = 0; i < count; i++) {
+
+    let yNormal = normalAttribute.getY(i)
+    if (onlyTop && yNormal != 1) continue;
+
+    let u = uvAttribute.getX(i);
+    let v = uvAttribute.getY(i);
+
+    let un = mapRange(u, bbox.min.x, bbox.max.x, 0, 1);
+    let vn = mapRange(v, bbox.min.z, bbox.max.z, 0, 1);
+
+    uvAttribute.setXY(i, un, vn);
+  }
+
+  geometry.attributes.uv.needsUpdate = true;
+}
 
 const myUVGenerator = {
 
@@ -153,6 +190,6 @@ const myUVGenerator = {
 
     }
 
-  }
+  },
 
 };

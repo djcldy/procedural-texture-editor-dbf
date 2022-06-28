@@ -3,7 +3,7 @@ import { OrbitControls } from "./jsm/OrbitControls.js";
 import { TransformControls } from "./jsm/TransformControls.js";
 import { GenerateTexture } from "./libs/procedural-texture.js";
 import sampleSolution from "./jsm/sampleSolution2.js";
-import { extrude, extrudeBlock } from "./jsm/3d-tools.js";
+import { extrude, extrudeBlock, setPlotMeshUVbyBbox } from "./jsm/3d-tools.js";
 import { TextureBlock } from "./libs/block-elements.js";
 import { presets } from "./libs/presets.js";
 
@@ -97,10 +97,10 @@ function ProceduralTextureMesh(solution, plotSettings, facadeSettings) {
         let texture = map.clone()
 
         m.material.alphaMap = null
-
         map.wrapS = map.wrapT = THREE.RepeatWrapping; // CHANGED
-        texture.offset.set(1,1); // CHANGED
-        texture.repeat.set(0.01, 0.01); // CHANGED
+        //turned off the texture offsets for plot meshes
+        //texture.offset.set(1,1); // CHANGED
+        //texture.repeat.set(0.01, 0.01); // CHANGED
         //           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         // texture.repeat.set( 1 / 500, 1 / 500 );
 
@@ -112,6 +112,7 @@ function ProceduralTextureMesh(solution, plotSettings, facadeSettings) {
     })
 
     scene.add(...planes)
+    scene.add(...meshes)
 
 }
 
@@ -154,7 +155,7 @@ function PlotTexture({ plots, blocks }, settings) {
     let mat = new THREE.MeshPhongMaterial({
         bumpScale: 1,
         reflectivity: 0.3,
-        transparent: true,
+        transparent: true, //there is some Z-fighting between planes because they overlap transparency
     });
 
 
@@ -164,9 +165,10 @@ function PlotTexture({ plots, blocks }, settings) {
         settings['plotAttributes'] = { shape, buildable, /*footprint*/ }
         let { diffuse, alpha, bump } = GenerateTexture(settings, 'plot')
         let material = mat.clone()
-        // console.log(diffuse)
         material.map = diffuse
-        material.alphaMap = diffuse
+        // when using diffuse for planes the alphaMap transparency of the line 
+        // is based on it's color - white - nontransparent, black - transparent
+        material.alphaMap = diffuse 
         // material.bumpMap = bump 
         materials.push(material)
 
@@ -206,13 +208,17 @@ function PlotMesh({ plots, blocks }) {
 
     const meshes = Object.values(plots).map((plot) => {
 
-
-        return extrude({
+        let mesh = extrude({
             polygon: plot.shape,
             depth: 1,
         });
-    });
 
+        // create plot UVs (in domain from 0 to 1) based on it's world Bounding box
+        setPlotMeshUVbyBbox(mesh, false)
+
+        return mesh
+
+    });
 
     let material = new THREE.MeshPhongMaterial({ wireframe: false });
 
@@ -311,8 +317,6 @@ function PlotMesh({ plots, blocks }) {
     return { meshes, planes }
 
 }
-
-
 
 
 function BuildingMesh({ blocks }, settings) {
