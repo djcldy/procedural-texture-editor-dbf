@@ -77,7 +77,7 @@ export function extrude({
     }
   }
 
-  const geometry = new ExtrudeBufferGeometry(shape, { depth, bevelEnabled: false, UVGenerator:myUVGenerator});
+  const geometry = new ExtrudeBufferGeometry(shape, { depth, bevelEnabled: false, UVGenerator: myUVGenerator });
   geometry.rotateX(-Math.PI / 2);
 
   const mesh = new Mesh(
@@ -85,8 +85,8 @@ export function extrude({
     material
       ? material.clone()
       : new MeshStandardMaterial({
-          color: new Color(Math.random(), Math.random(), Math.random()),
-        })
+        color: new Color(Math.random(), Math.random(), Math.random()),
+      })
   );
   if (rotation) {
     mesh.rotateX(rotation.x);
@@ -100,10 +100,10 @@ export function extrude({
   return mesh;
 }
 
-//Sets the Uvs of the plot mesh (optionally top) faces in the domain 0-1 based on mesh bounding box
-export function setPlotMeshUVbyBbox(mesh, onlyTop){
+//Sets the Uvs of the plot mesh top & bottom faces in the domain 0-1 based on mesh bounding box
+export function setPlotMeshUVbyBbox(mesh) {
   let geometry = mesh.geometry
-  
+
   //as plot mesh geometry was created with extruded geometry rotated by X -math.Pi, we need to rotate it's
   //the bounding box to opposite direction to get a proper UVs - let's create a copy of mesh geo and rotate it properly
   let geometryClone = geometry.clone()
@@ -112,23 +112,30 @@ export function setPlotMeshUVbyBbox(mesh, onlyTop){
   let bbox = geometryClone.boundingBox;
   geometryClone.dispose()
   console.log(geometry)
-  
-  //let's remap uvs of the mesh (optionally top) faces of extruded geometry to 0-1 domain based on rotated bbox
-  //to find top faces let's use the normals and select only those with normals = 1 on Y axis (top faces) 
+
+  //let's remap uvs of the mesh top and bottom faces of extruded geometry to 0-1 domain based on rotated bbox
+  //to find top faces let's use the normals and select only those with normals = 1 && - 1 on Y axis
   const uvAttribute = geometry.attributes.uv;
   const normalAttribute = geometry.attributes.normal;
   let count = uvAttribute.count
 
   for (let i = 0; i < count; i++) {
 
+    let un
+    let vn
+
     let yNormal = normalAttribute.getY(i)
-    if (onlyTop && yNormal != 1) continue;
+    
+    if (yNormal == 1 || yNormal == -1) {
+      let u = uvAttribute.getX(i);
+      let v = uvAttribute.getY(i);
 
-    let u = uvAttribute.getX(i);
-    let v = uvAttribute.getY(i);
-
-    let un = mapRange(u, bbox.min.x, bbox.max.x, 0, 1);
-    let vn = mapRange(v, bbox.min.z, bbox.max.z, 0, 1);
+      un = mapRange(u, bbox.min.x, bbox.max.x, 0, 1);
+      vn = mapRange(v, bbox.min.z, bbox.max.z, 0, 1);
+    } else {
+      un = 0
+      vn = 0
+    }
 
     uvAttribute.setXY(i, un, vn);
   }
@@ -138,54 +145,54 @@ export function setPlotMeshUVbyBbox(mesh, onlyTop){
 
 const myUVGenerator = {
 
-  generateTopUV: function ( geometry, vertices, indexA, indexB, indexC ) {
+  generateTopUV: function (geometry, vertices, indexA, indexB, indexC) {
 
-    const a_x = vertices[ indexA * 3 ];
-    const a_y = vertices[ indexA * 3 + 1 ];
-    const b_x = vertices[ indexB * 3 ];
-    const b_y = vertices[ indexB * 3 + 1 ];
-    const c_x = vertices[ indexC * 3 ];
-    const c_y = vertices[ indexC * 3 + 1 ];
+    const a_x = vertices[indexA * 3];
+    const a_y = vertices[indexA * 3 + 1];
+    const b_x = vertices[indexB * 3];
+    const b_y = vertices[indexB * 3 + 1];
+    const c_x = vertices[indexC * 3];
+    const c_y = vertices[indexC * 3 + 1];
 
     return [
-      new Vector2( a_x, a_y ),
-      new Vector2( b_x, b_y ),
-      new Vector2( c_x, c_y )
+      new Vector2(a_x, a_y),
+      new Vector2(b_x, b_y),
+      new Vector2(c_x, c_y)
     ];
 
   },
 
-  generateSideWallUV: function ( geometry, vertices, indexA, indexB, indexC, indexD ) {
+  generateSideWallUV: function (geometry, vertices, indexA, indexB, indexC, indexD) {
 
-    const a_x = vertices[ indexA * 3 ];
-    const a_y = vertices[ indexA * 3 + 1 ];
-    const a_z = vertices[ indexA * 3 + 2 ];
-    const b_x = vertices[ indexB * 3 ];
-    const b_y = vertices[ indexB * 3 + 1 ];
-    const b_z = vertices[ indexB * 3 + 2 ];
-    const c_x = vertices[ indexC * 3 ];
-    const c_y = vertices[ indexC * 3 + 1 ];
-    const c_z = vertices[ indexC * 3 + 2 ];
-    const d_x = vertices[ indexD * 3 ];
-    const d_y = vertices[ indexD * 3 + 1 ];
-    const d_z = vertices[ indexD * 3 + 2 ];
+    const a_x = vertices[indexA * 3];
+    const a_y = vertices[indexA * 3 + 1];
+    const a_z = vertices[indexA * 3 + 2];
+    const b_x = vertices[indexB * 3];
+    const b_y = vertices[indexB * 3 + 1];
+    const b_z = vertices[indexB * 3 + 2];
+    const c_x = vertices[indexC * 3];
+    const c_y = vertices[indexC * 3 + 1];
+    const c_z = vertices[indexC * 3 + 2];
+    const d_x = vertices[indexD * 3];
+    const d_y = vertices[indexD * 3 + 1];
+    const d_z = vertices[indexD * 3 + 2];
 
-    if ( Math.abs( a_y - b_y ) < 0.01 ) {
+    if (Math.abs(a_y - b_y) < 0.01) {
 
       return [
-        new Vector2( a_x, 1 - a_z ),
-        new Vector2( b_x, 1 - b_z ),
-        new Vector2( c_x, 1 - c_z ),
-        new Vector2( d_x, 1 - d_z )
+        new Vector2(a_x, 1 - a_z),
+        new Vector2(b_x, 1 - b_z),
+        new Vector2(c_x, 1 - c_z),
+        new Vector2(d_x, 1 - d_z)
       ];
 
     } else {
 
       return [
-        new Vector2( a_y, 1 - a_z ),
-        new Vector2( b_y, 1 - b_z ),
-        new Vector2( c_y, 1 - c_z ),
-        new Vector2( d_y, 1 - d_z )
+        new Vector2(a_y, 1 - a_z),
+        new Vector2(b_y, 1 - b_z),
+        new Vector2(c_y, 1 - c_z),
+        new Vector2(d_y, 1 - d_z)
       ];
 
     }
