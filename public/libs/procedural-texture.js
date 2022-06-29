@@ -1,17 +1,7 @@
 console.log('procedural-texture.js');
 
 import * as THREE from '../jsm/three.module.js'; // maciej make sure ur loading threjs here
-// import {
-//     Commercial90,
-//     Residential,
-//     Office,
-//     Industrial90,
-//     Recreational90,
-//     Institutional90,
-//     Institutional50,
-//     CustomRule
-// } from './texture-presets.js'
-
+import { TextureBlock } from './block-elements.js';
 import {
   Background,
   CurtainWall,
@@ -30,6 +20,86 @@ import {
   Replace,
   Frame,
 } from './texture-rules.js'; // maciej make sure ur loading threjs here
+
+
+
+export async function ProceduralTexture(solution, textures, scene) {
+
+
+    var start = new Date().getTime(); // benchmark = 482ms
+   
+    let material = new THREE.MeshPhongMaterial({
+        bumpScale: 1,
+        envMap: scene.background,
+        reflectivity: 0.3,
+        transparent: true,
+    });
+
+
+// 0. assign textures to solution
+    let parsedTextures = textures.map((o) => ParseRule(o)); // 1. intializes texture generation methods 
+    let cache = await initTextures(parsedTextures) // 2. generates texture maps 
+
+    // 3. generate meshes & apply textures accordingly 
+
+    let arr = Object.values(cache)
+
+
+    Object.values(solution.blocks).map((block) => {
+
+        let meshes = TextureBlock(block); // generate facades 
+
+        meshes.forEach((mesh) => {
+
+            let { width } = mesh;
+            let settings = {
+                totalHeight: block.f2f * block.floors,
+                floorHeight: block.f2f,
+                totalWidth: width,
+            };
+
+            let { diffuse, alpha, bump } = arr[Math.floor(Math.random() * arr.length)]
+
+            mesh.material = material.clone()
+            mesh.material.map = repeatTexture(settings, diffuse)
+            mesh.material.bumpMap = repeatTexture(settings, bump)
+            mesh.material.alphaMap = repeatTexture(settings, alpha) 
+
+            scene.add(mesh);
+
+        });
+    });
+
+    var end = new Date().getTime();
+    var time = end - start;
+    console.log('time...', time, 'ms')
+
+}
+
+
+async function initTextures(parsedTextures){
+
+    let cache = {};
+
+    const promiseArray = parsedTextures.map((o) => {
+
+        if (!cache[o.name]) {
+            cache[o.name] = null
+            return GenerateTexture(o)
+        }
+
+    });
+
+    const resArray = await Promise.all(promiseArray);
+
+    resArray.forEach((res, i) => {
+        cache[parsedTextures[i].name] = res;
+    });
+
+    return cache 
+
+
+}
 
 
 export async function TextureFactory(settings) {

@@ -1,25 +1,19 @@
 import * as THREE from './jsm/three.module.js';
 import { OrbitControls } from './jsm/OrbitControls.js';
 import { TransformControls } from './jsm/TransformControls.js';
-import { GenerateTexture, ParseRule,repeatTexture } from './libs/procedural-texture.js';
+import { ProceduralTexture } from './libs/procedural-texture.js';
 import sampleSolution from './jsm/sampleSolution2.js';
-import { extrude, extrudeBlock } from './jsm/3d-tools.js';
-import { TextureBlock } from './libs/block-elements.js';
 import { presets } from './libs/presets.js';
-import { getOffset } from './jsm/clipper-tools.js';
+
+
 let container;
 let camera, scene, raycaster;
 let renderer, control, orbit;
 let cubeMap;
 let INTERSECTED;
-let theta = 0;
 const mouse = new THREE.Vector2();
-const radius = 100;
 let objects = [];
-let totalHeight = 50;
-let floorHeight = 4;
-let blocks;
-let defaultMaterial;
+
 
 const submitBtn = document.getElementById('submitFacade');
 const ruleText = document.getElementById('ruleText');
@@ -54,145 +48,7 @@ sel.onchange = function() {
 init();
 animate();
 
-async function ProceduralTexture(solution, textures, scene) {
 
-
-    var start = new Date().getTime(); // benchmark = 482ms
-
-    // let settings = ParseRule(textures[0]) // turns preset string into methods
-
-    let cache = {};
-
-    let parsedTextures = textures.map((o) => ParseRule(o));
-
-    let material = new THREE.MeshPhongMaterial({
-        bumpScale: 1,
-        envMap: scene.background,
-        reflectivity: 0.3,
-        transparent: true,
-    });
-
-    const promiseArray = parsedTextures.map((o) => {
-
-        if (!cache[o.name]) {
-
-            cache[o.name] = null
-            return GenerateTexture(o)
-        }
-    });
-
-    const resArray = await Promise.all(promiseArray);
-
-    resArray.forEach((res, i) => {
-        cache[parsedTextures[i].name] = res;
-        console.log('...i')
-    });
-
-
-    var end = new Date().getTime();
-    var time = end - start;
-
-
-    let arr = Object.values(cache)
-
-
-    Object.values(solution.blocks).map((block) => {
-
-        let meshes = TextureBlock(block); // generate facades 
-
-        meshes.forEach((mesh) => {
-
-            let { width } = mesh;
-            let settings = {
-                totalHeight: block.f2f * block.floors,
-                floorHeight: block.f2f,
-                totalWidth: width,
-            };
-
-            mesh.material = material.clone()
-
-            let { diffuse, alpha, bump } = arr[Math.floor(Math.random() * arr.length)]
-
-            mesh.material.map = repeatTexture(settings, diffuse)
-            mesh.material.bumpMap = repeatTexture(settings, bump)
-            mesh.material.alphaMap = repeatTexture(settings, alpha) 
-
-            scene.add(mesh);
-
-        });
-    });
-
-    var end = new Date().getTime();
-    var time = end - start;
-    console.log('time...', time, 'ms')
-
-
-    //cache is generated at this point
-
-    //   Promise.all(promiseArray).then((resArray) => {
-    //     resArray.forEach((res, i) => {
-    //       cache[parsedTextures[i].name] = res;
-
-    //       console.log(cache);
-
-    //       var end = new Date().getTime();
-    //       var time = end - start;
-    //       console.log('time...', time, 'ms');
-    //     });
-    //   });
-
-    //   parsedTextures.forEach((o) => {
-    //     GenerateTexture(o).then((res) => {
-    //       cache[o.name] = res;
-
-    //       console.log(cache);
-
-    //       var end = new Date().getTime();
-    //       var time = end - start;
-    //       console.log('time...', time, 'ms');
-    //     });
-    //   });
-
-    /*    Object.values(solution.blocks).map((block) => {
-
-              let meshes = TextureBlock(block); // generate facades 
-
-              meshes.forEach((mesh) => {
-                  let { width } = mesh;
-                  settings['buildingAttributes'] = {
-                      totalHeight: block.f2f * block.floors,
-                      floorHeight: block.f2f,
-                      totalWidth: width,
-                      slabThickness: 0.5
-                  };
-
-                  mesh.material = material.clone()
-
-
-                  GenerateTexture(settings).then((res) => {
-
-                      let { diffuse, alpha, bump } = res
-                      mesh.material.map = diffuse
-                      mesh.material.bumpMap = bump
-                      mesh.material.alphaMap = alpha
-
-                      scene.add(mesh);
-
-                                  var end = new Date().getTime();
-                  var time = end - start;
-                  console.log('time...', time, 'ms')
-
-                  });
-
-
-
-              });
-          });*/
-}
-
-function GenerateTextures() {}
-
-function AssignMeshTextures() {}
 
 function MergeObjects(obj1, obj2) {
     let obj = {};
@@ -349,32 +205,10 @@ function animate() {
 }
 
 function render() {
-    // theta += 0.5
-
-    // camera.position.x = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
-    // camera.position.y = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
-    // camera.position.z = radius * Math.cos( THREE.MathUtils.degToRad( theta ) );
-    // camera.lookAt( scene.position );
-
     renderer.render(scene, camera);
 }
 
-function initPlane() {
-    let planeGeometry = new THREE.PlaneGeometry(500, 500);
-    planeGeometry.rotateX(-Math.PI / 2);
 
-    const material = new THREE.MeshStandardMaterial({
-        color: 0xff00ff,
-    });
-
-    let planeMaterial = new THREE.ShadowMaterial();
-    planeMaterial.opacity = 0.5;
-
-    let plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.position.y = 0.1;
-    plane.receiveShadow = true;
-    scene.add(plane);
-}
 
 function clearScene() {
     for (let i = scene.children.length - 1; i >= 0; i--) {
@@ -394,12 +228,6 @@ function init() {
     scene = new THREE.Scene();
 
     cubeMap = setCubeMap();
-
-    defaultMaterial = new THREE.MeshPhongMaterial({
-        envMap: cubeMap,
-        reflectivity: 0.3,
-        transparent: true,
-    });
 
     scene.background = cubeMap;
 
