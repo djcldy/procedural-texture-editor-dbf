@@ -142,9 +142,7 @@ function initRequest() {
 }
 
 async function submitFacadeRule() {
-    console.log('rule submitted');
-    ruleText.value = ruleText.value.replace(/\s+/g, '');
-    clearScene();
+
 
     let arr = []
 
@@ -158,8 +156,8 @@ async function submitFacadeRule() {
 
     await ProceduralTexture(sampleSolution, arr, scene);
 
-    // ProceduralTexture(sampleSolution, [ParseRequest(ruleText.value)], scene);
-    ruleText.value = JSON.stringify(JSON.parse(ruleText.value), null, 4);
+
+
 }
 
 // do not touch...

@@ -26,9 +26,6 @@ import {
 export async function ProceduralTexture(solution, textures, scene) {
 
 
-  console.log('procedural-texture')
-
-
     var start = new Date().getTime(); // benchmark = 482ms
    
     let material = new THREE.MeshPhongMaterial({
