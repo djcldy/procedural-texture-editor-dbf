@@ -23,10 +23,9 @@ import {
 
 
 
-export async function ProceduralTexture(solution, textures, scene) {
+export async function ProceduralTexture(solution, scene) {
 
-
-  console.log('procedural-texture')
+  let {facades} = solution
 
 
     var start = new Date().getTime(); // benchmark = 482ms
@@ -38,9 +37,9 @@ export async function ProceduralTexture(solution, textures, scene) {
         transparent: true,
     });
 
-
-// 0. assign textures to solution
-    let parsedTextures = textures.map((o) => ParseRule(o)); // 1. intializes texture generation methods 
+    // 0. assign textures to solution
+    
+    let parsedTextures = facades.map((o) => ParseRule(o)); // 1. intializes texture generation methods 
     let cache = await initTextures(parsedTextures) // 2. generates texture maps 
 
     // 3. generate meshes & apply textures accordingly 
@@ -134,7 +133,7 @@ export function repeatTexture(settings, referenceTexture){
   let { totalHeight, floorHeight, totalWidth, /*moduleWidth*/ } = settings 
   let {moduleWidth} = referenceTexture.settings
 
-  console.log(totalWidth, moduleWidth)
+  // console.log(totalWidth, moduleWidth)
 
   let numFloors = totalHeight / floorHeight;
   let numModules = totalWidth / moduleWidth;

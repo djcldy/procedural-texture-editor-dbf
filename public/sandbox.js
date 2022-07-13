@@ -17,7 +17,7 @@ let objects = [];
 
 
 init()
-initRequest()
+initRequest(scene)
 animate()
 
 
