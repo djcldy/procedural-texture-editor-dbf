@@ -1,11 +1,10 @@
 import * as THREE from './jsm/three.module.js';
 import { OrbitControls } from './jsm/OrbitControls.js';
 import { TransformControls } from './jsm/TransformControls.js';
-import { ProceduralTexture } from './libs/procedural-texture.js';
 import sampleSolution from './jsm/sampleSolution2.js';
 
 
-import {submitFacadeRule} from './libs/procedural-texture/API.js'
+import {TextureAPI} from './libs/procedural-texture/API.js'
 import {presets} from './libs/procedural-texture/facade/presets.js'
 
 let container;
@@ -144,33 +143,17 @@ function clearScene() {
     }
 }
 
-
-
-
-
-// function initRequest() {
-//     let settings = presets['examples']['texture'];
-//     ruleText.value = JSON.stringify(settings, null, 4);
-//     submitFacadeRule(sampleSolution, scene);
-// }
-
-
-
-
-
-    
-
-
 init();
 
 
 var start = new Date().getTime(); // benchmark = 482ms
 
 
-submitFacadeRule(sampleSolution, scene);
+TextureAPI(sampleSolution, scene);
 
 var end = new Date().getTime();
 var time = end - start;
-console.log('time...', time, 'ms')
+
+
 
 animate();

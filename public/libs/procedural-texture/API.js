@@ -1,13 +1,15 @@
 import { ProceduralTexture } from '../procedural-texture.js';
 import { presets } from './facade/presets.js';
+import {AssignFacades} from './facade/assign.js';
 
 
+export async function TextureAPI(specimen, scene) {
 
 
-export async function submitFacadeRule(specimen, scene) {
+    console.log(specimen)
 
-    console.log('submitFacadeRule')
 
+    let facades = AssignFacades(specimen)
 
     let arr = []
 
@@ -18,12 +20,15 @@ export async function submitFacadeRule(specimen, scene) {
 
     })
 
-
-    specimen.facades = arr 
-
-    await ProceduralTexture(specimen, scene); // adding randomly from a list 
-
+    // specimen.facades = arr 
+    // await ProceduralTexture(specimen, scene); // adding randomly from a list 
 }
+
+
+
+
+
+
 
 function ParseRequest(str) {
     let object = JSON.parse(str);
