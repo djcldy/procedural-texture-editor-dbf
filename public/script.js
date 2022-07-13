@@ -15,38 +15,9 @@ const mouse = new THREE.Vector2();
 let objects = [];
 
 
-const submitBtn = document.getElementById('submitFacade');
-const ruleText = document.getElementById('ruleText');
-submitBtn.addEventListener('click', submitFacadeRule);
 
-// Execute a function when the user presses a key on the keyboard
-ruleText.addEventListener('keypress', function(event) {
-    // If the user presses the "Enter" key on the keyboard
-    if (event.key === 'Enter') {
-        event.preventDefault(); // Cancel the default action, if needed
-        document.getElementById('submitFacade').click(); // Trigger the button element with a click
-    }
-});
-
-let ele = document.getElementById('sel');
-
-for (let prop in presets) {
-    for (let step in presets[prop]) {
-        ele.innerHTML = ele.innerHTML + '<option value="' + prop + ',' + step + '">' + prop + '-' + step + '</option>';
-    }
-}
-
-sel.onchange = function() {
-    let ele = document.getElementById('sel');
-    let text = ele.value;
-    let id = text.split(',');
-    let settings = presets[id[0]][id[1]];
-    ruleText.value = JSON.stringify(settings, null, 4);
-    submitFacadeRule();
-};
-
-init();
-animate();
+// init();
+// animate();
 
 
 
@@ -135,13 +106,14 @@ function setMatrix(matrix, x, y, z) {
     return matrix;
 }
 
-function initRequest() {
+
+export function initRequest() {
     let settings = presets['examples']['texture'];
     ruleText.value = JSON.stringify(settings, null, 4);
     submitFacadeRule();
 }
 
-async function submitFacadeRule() {
+export async function submitFacadeRule() {
 
 
     let arr = []
@@ -159,7 +131,7 @@ async function submitFacadeRule() {
 
 
 }
-
+/*
 // do not touch...
 
 function setCubeMap() {
@@ -205,8 +177,8 @@ function animate() {
 function render() {
     renderer.render(scene, camera);
 }
-
-
+*/
+/*
 
 function clearScene() {
     for (let i = scene.children.length - 1; i >= 0; i--) {
@@ -249,5 +221,5 @@ function init() {
     document.addEventListener('mousemove', onDocumentMouseMove, false);
     window.addEventListener('resize', onWindowResize, false);
 
-    initRequest();
-}
+
+}*/
