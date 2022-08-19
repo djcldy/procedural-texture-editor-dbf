@@ -1,7 +1,7 @@
 import { ProceduralTexture } from '../procedural-texture.js';
 import { presets } from './facade/presets.js';
 import {AssignFacades} from './facade/assign.js';
-
+import { BuildingVolumeGraph } from '../graph/API.js';
 
 export async function TextureAPI(specimen, scene) {
 
@@ -9,7 +9,10 @@ export async function TextureAPI(specimen, scene) {
     console.log(specimen)
 
 
-    let facades = AssignFacades(specimen)
+    BuildingVolumeGraph(specimen)
+
+
+    // let facades = AssignFacades(specimen)
 
     let arr = []
 
@@ -20,8 +23,8 @@ export async function TextureAPI(specimen, scene) {
 
     })
 
-    // specimen.facades = arr 
-    // await ProceduralTexture(specimen, scene); // adding randomly from a list 
+    specimen.facades = arr 
+    await ProceduralTexture(specimen, scene); // adding randomly from a list 
 }
 
 

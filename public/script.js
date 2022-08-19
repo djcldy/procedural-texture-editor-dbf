@@ -5,7 +5,6 @@ import sampleSolution from './jsm/sampleSolution2.js';
 
 import { TextureAPI } from './libs/procedural-texture/API.js';
 import { presets } from './libs/procedural-texture/facade/presets.js';
-// import { cleanPSLG } from './libs/clean-pslg.js';
 
 let container;
 let camera, scene, raycaster;
@@ -145,7 +144,7 @@ var time = end - start;
 
 animate();
 
-function testPSLG() {
+/*function testPSLG() {
   //Create a planar straight line graph with many degenerate crossings
   var points = [
     [0.25, 0.5],
@@ -178,3 +177,4 @@ function testPSLG() {
 }
 
 testPSLG();
+*/
